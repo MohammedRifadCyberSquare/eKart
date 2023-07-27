@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Customer
+from .models import Customer,Seller
 # Create your views here.
 
 
@@ -32,7 +32,42 @@ def dashboard(request):
 
 
 def seller_register(request):
-    return render(request, 'customer/seller_register.html')
+    message = ''
+    status = False
+    if request.method == 'POST':  
+        first_name = request.POST['fname'] 
+        last_name = request.POST['lastname']
+        email = request.POST['email']
+        gender = request.POST['gender']
+        city = request.POST['city']
+        country = request.POST['country']
+        account_no = request.POST['acc_no']
+        bank_name = request.POST['bank_name']
+        branch = request.POST['branch']
+        ifsc = request.POST['ifsc']
+        pic = request.FILES['pic']
+
+
+
+
+
+        
+       
+        seller_exist = Seller.objects.filter(email = email).exists()
+
+        if not seller_exist: 
+
+            seller = Seller(first_name = first_name, last_name = last_name, gender = gender, email = email, 
+                            city = city, country = country, account_no = account_no, bank_name = bank_name,
+                            branch_name = branch, ifsc = ifsc, pic = pic)
+            seller.save()
+            message = 'Registration Succesful'
+            status = True
+
+        
+        else:
+            message = 'Email Exists'
+    return render(request, 'customer/seller_register.html', {'message': message})
 
 
 def seller_login(request):
@@ -41,9 +76,8 @@ def seller_login(request):
 
 def customer_signup(request):
     message = ''
-    if request.method == 'POST':  # when user submit the form
-        # here fname is the name attribute given in form input
-        # fetching values from form data and storing in variable
+    status = False
+    if request.method == 'POST':  
         first_name = request.POST['fname'] 
         last_name = request.POST['lastname']
         email = request.POST['email']
@@ -53,7 +87,7 @@ def customer_signup(request):
         password = request.POST['password']
 
         
-        # use exists() method to check whether the user with given email exists, it returns boolean
+        
         customer_exist = Customer.objects.filter(email = email).exists()
 
         if not customer_exist: 
@@ -62,13 +96,14 @@ def customer_signup(request):
                             city = city, country = country, password = password)
             customer.save()
             message = 'Registration Succesful'
+            status = True
 
         
         else:
             message = 'Email Exists'
    
 
-    return render(request, 'customer/customer_signup.html', {'message': message})
+    return render(request, 'customer/customer_signup.html', {'message': message, 'status': status})
 
 
 def customer_login(request):
