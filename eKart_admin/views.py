@@ -1,7 +1,9 @@
 from django.shortcuts import render,redirect
 from customer.models import Seller
 from .models import EkartAdmin,Category
-# Create your views here.
+from random import randint
+from django.core.mail import send_mail
+from django.conf import settings
 
 def admin_login(request):
     message = ''
@@ -44,6 +46,30 @@ def add_category(request):
         else:
             message = 'Already Added'
     return render(request,'ekart_admin/add_category.html', {'message': message})
+
+
+def approve_seller(request,id):
+
+    seller = Seller.objects.get(id = id)
+    seller_id = randint(11111, 999999)
+    temporary_password = 'sel-' + str(seller_id)  
+    subject = 'username and temporary password'
+    message = 'Hi! your Ekart account has been approved, your seller id is ' + str(seller_id) + temporary_password + ' and temporary password is ' + str(temporary_password)
+    from_email = settings.EMAIL_HOST_USER
+    recipient_list = [seller.email,]
+
+    # send_mail(
+    #     subject = subject,
+    #     message = message,
+    #     from_email = from_email,
+    #     recipient_list = recipient_list
+    # )
+
+    Seller.objects.filter(id = id).update(login_id = seller_id, password = temporary_password, status = 'active')
+
+    return redirect('ekart_admin:pending_sellers')
+
+
 
 def pending_sellers(request):
     pending_list = Seller.objects.filter(status = 'pending')

@@ -31,7 +31,7 @@
          <td>{{ seller.city }}</td>
          <td>{{ seller.country }}</td>
 
-         <td><a href="" class = "btn btn-success">Approve</a></td>
+         <td><a href="{% url 'ekart_admin:approve_seller' seller.id %}" class = "btn btn-success">Approve</a></td>
          <td><a href="" class = "btn btn-danger">Reject</a></td>
 
 
