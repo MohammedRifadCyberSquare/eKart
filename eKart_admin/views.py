@@ -1,4 +1,5 @@
 from django.shortcuts import render,redirect
+from customer.models import Seller
 from .models import EkartAdmin,Category
 # Create your views here.
 
@@ -45,7 +46,8 @@ def add_category(request):
     return render(request,'ekart_admin/add_category.html', {'message': message})
 
 def pending_sellers(request):
-    return render(request,'ekart_admin/pending_sellers.html')
+    pending_list = Seller.objects.filter(status = 'pending')
+    return render(request,'ekart_admin/pending_sellers.html', {'list': pending_list})
 
 def approved_sellers(request):
     return render(request,'ekart_admin/approved_sellers.html')

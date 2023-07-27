@@ -41,6 +41,7 @@ def seller_register(request):
         last_name = request.POST['lastname']
         email = request.POST['email']
         gender = request.POST['gender']
+        company_name = request.POST['cmp_name']
         city = request.POST['city']
         country = request.POST['country']
         account_no = request.POST['acc_no']
@@ -48,7 +49,7 @@ def seller_register(request):
         branch = request.POST['branch']
         ifsc = request.POST['ifsc']
         pic = request.FILES['pic']
-
+        
 
 
 
@@ -59,7 +60,7 @@ def seller_register(request):
 
         if not seller_exist: 
 
-            seller = Seller(first_name = first_name, last_name = last_name, gender = gender, email = email, 
+            seller = Seller(first_name = first_name, last_name = last_name, company_name = company_name,    gender = gender, email = email, 
                             city = city, country = country, account_no = account_no, bank_name = bank_name,
                             branch_name = branch, ifsc = ifsc, pic = pic)
             seller.save()
