@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from .models import EkartAdmin
+from .models import EkartAdmin,Category
 # Create your views here.
 
 def admin_login(request):
@@ -22,16 +22,27 @@ def admin_home(request):
     return render(request,'ekart_admin/admin_home.html')
 
 def view_category(request):
-    return render(request,'ekart_admin/view_category.html')
+    category_list = Category.objects.all()
+    print(category_list)
+
+    return render(request,'ekart_admin/view_category.html', {'category': category_list})
 
 def add_category(request):
+    message = ''
     if request.method == 'POST':
-        category = request.POST['category']
+        category = request.POST['category_name'].lower()
         description = request.POST['description']
         cover_pic = request.FILES['cover_pic']
 
-        category
-    return render(request,'ekart_admin/add_category.html')
+        category_exist = Category.objects.filter(category = category).exists()
+
+        if not category_exist:
+            category = Category(category = category, description = description, cover_pic = cover_pic)
+            category.save()
+            message = 'Category Added'
+        else:
+            message = 'Already Added'
+    return render(request,'ekart_admin/add_category.html', {'message': message})
 
 def pending_sellers(request):
     return render(request,'ekart_admin/pending_sellers.html')

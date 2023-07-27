@@ -1,10 +1,12 @@
 from django.shortcuts import render
+from eKart_admin.models import Category
 from .models import Customer,Seller
 # Create your views here.
 
 
 def customer_home(request):
-    return render(request, 'customer/customer_home.html')
+    category_list = Category.objects.all()
+    return render(request, 'customer/customer_home.html', {'category_list': category_list,})
 
 
 def store(request):
