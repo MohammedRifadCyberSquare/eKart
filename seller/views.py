@@ -22,32 +22,30 @@ def add_product(request):
         price = request.POST['price']
         image = request.FILES['image']
         seller = request.session['seller']
-        print(category)
+        
 
-        try:
+       
              
-            product, created = Product.objects.get_or_create(product_no = product_no, seller = seller, defaults = {
-                'product_no': product_no, 
-                'product_name': product_name,
-                'seller': Seller.objects.get(id = seller),
-                'category': Category.objects.get(id = category),
-                'description': description,
-                'stock': stock,
-                'price': price,
-                'image': image,
-            })
+        product, created = Product.objects.get_or_create(product_no = product_no, seller = seller, defaults = {
+            'product_no': product_no, 
+            'product_name': product_name,
+            'seller': Seller.objects.get(id = seller),
+            'category': Category.objects.get(id = category),
+            'description': description,
+            'stock': stock,
+            'price': price,
+            'image': image,
+        })
 
-            if created:
-                print('added')
-                message = 'Product Added'
-            
-            else:
-                print('else')
-                message = 'Product No Already exists'
+        if created:
+            print('added')
+            message = 'Product Added'
+        
+        else:
+            print('else')
+            message = 'Product No Already exists'
 
-        except Exception as e:
-            print(e) 
-            pass
+       
 
     context = {
         'category': category_list,

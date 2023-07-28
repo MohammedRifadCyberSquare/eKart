@@ -13,7 +13,7 @@ class Product(models.Model):
     stock = models.IntegerField()
     price = models.FloatField()
     image = models.ImageField(upload_to = 'product/')
-    status = models.CharField(max_length = 20)
+    status = models.CharField(max_length = 20, default = 'available')
     
     class Meta:
         db_table = 'product_tb'
