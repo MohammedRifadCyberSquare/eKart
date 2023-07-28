@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from eKart_admin.models import Category
 from .models import Customer,Seller
 # Create your views here.
@@ -74,6 +74,22 @@ def seller_register(request):
 
 
 def seller_login(request):
+    message = ''
+    if request.method == 'POST':
+        username = request.POST['seller_id']
+        password = request.POST['password']
+
+        seller = Seller.objects.filter(login_id = username, password = password)
+
+        if seller.exists():
+            request.session['seller'] = seller[0].id
+            request.session['seller_name'] = seller[0].first_name + ' ' + seller[0].last_name
+            return redirect('Seller:seller_home')
+
+        else:
+
+            message = 'Invalid Username Or Password'
+
     return render(request, 'customer/seller_login.html')
 
 

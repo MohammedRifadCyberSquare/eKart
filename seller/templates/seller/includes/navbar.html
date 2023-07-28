@@ -16,10 +16,7 @@
                 <a href="#" class="nav-link"> USD </a>
             </li>
         </ul>
-        <ul class="navbar-nav">
-            <li><a href="#" class="nav-link"> <i class="fa fa-envelope"></i> Email </a></li>
-            <li><a href="#" class="nav-link"> <i class="fa fa-phone"></i> Call us </a></li>
-        </ul> <!-- list-inline //  -->
+        
       </div> <!-- navbar-collapse .// -->
     </div> <!-- container //  -->
     </nav>
@@ -31,7 +28,16 @@
             <a href="./" class="brand-wrap">
                 <img class="logo" src="{% static './images/logo.png' %}">
             </a> <!-- brand-wrap.// -->
-        </div>            
+        </div>   
+        <div class="col-lg-6 col-md-7 col-4">
+           
+            
+        </div>
+
+        <div class="col-lg-4 col-md-2 col-2">
+           Welcome,  {{ request.session.seller_name }}
+            
+        </div>
     
             </div> <!-- row.// -->
         </div> <!-- container.// -->
