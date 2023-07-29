@@ -60,6 +60,7 @@ def view_category(request):
     return render(request, 'seller/view_category.html')
 
 def view_products(request):
+     
     return render(request, 'seller/view_product.html')
 
 def profile(request):

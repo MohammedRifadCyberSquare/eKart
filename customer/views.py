@@ -1,20 +1,23 @@
 from django.shortcuts import render, redirect
 from eKart_admin.models import Category
 from .models import Customer,Seller
+from seller.models import Product
 # Create your views here.
 
 
 def customer_home(request):
-    category_list = Category.objects.all()
-    return render(request, 'customer/customer_home.html', {'category_list': category_list,})
+     
+    return render(request, 'customer/customer_home.html',  )
 
 
 def store(request):
+
     return render(request, 'customer/store.html')
 
 
-def product_detail(request):
-    return render(request, 'customer/product_detail.html')
+def product_detail(request, cat_id):
+    products = Product.objects.filter(category = id).values('id','product_name','seller','price','image')
+    return render(request, 'customer/product_detail.html', {'products': products,})
 
 
 def cart(request):
