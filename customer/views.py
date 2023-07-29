@@ -129,7 +129,26 @@ def customer_signup(request):
 
 
 def customer_login(request):
-    return render(request, 'customer/customer_login.html')
+
+    message = ''
+
+    if request.method == 'POST':
+
+
+        email = request.POST['email']
+        password = request.POST['password']
+
+        customer = Customer.objects.filter(email = email, password = password)
+
+        if customer.exists():
+            request.session['customer'] = customer[0].id
+            request.session['customer_name'] = customer[0].first_name
+
+            return redirect('customer:customer_home')
+        else:
+            message = 'Username or Password Incorrect'
+
+    return render(request, 'customer/customer_login.html', {'message': message,})
 
 
 def forgot_password_customer(request):
