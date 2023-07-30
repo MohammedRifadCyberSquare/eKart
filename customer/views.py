@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from eKart_admin.models import Category
-from .models import Customer,Seller
-from seller.models import Product
+from django.shortcuts import get_object_or_404  
+from .models import Customer,Cart
+from seller.models import Product, Seller
 # Create your views here.
 
 
@@ -11,17 +12,77 @@ def customer_home(request):
 
 
 def store(request):
+    query = request.GET.get('query')
+    
+    if query == 'all':
+        products = Product.objects.all()
+     
+    else:
+         
+        products = Product.objects.filter(category = query)
+    count = products.count()
 
-    return render(request, 'customer/store.html')
+    context = {
+        'products': products,
+        'product_count': count
+    }
+
+    return render(request, 'customer/store.html', context)
 
 
-def product_detail(request, cat_id):
-    products = Product.objects.filter(category = id).values('id','product_name','seller','price','image')
-    return render(request, 'customer/product_detail.html', {'products': products,})
+def product_detail(request, product_id):
+    seller = request.session['seller']
+    message = ''
+     
+    product = Product.objects.get(id = product_id)
+    customer = Customer.objects.get(id = request.session['customer'])
+    product = None
+
+    
+    product = get_object_or_404(Product, id = product_id)
+   
+    
+  
+
+    if request.method == 'POST':
+        cart = Cart(customer = customer, product = product)
+        cart.save()
+        return redirect('customer:cart')
+             
+   
+    
+    try:
+
+        cart_item = get_object_or_404(Cart, customer = customer,product = product_id)
+        item_exist = True
+        
+
+
+    except Exception as e:
+         
+        item_exist = False
+         
+
+
+    context = {
+        'product': product,
+        'item_exist': item_exist
+    }    
+   
+    return render(request, 'customer/product_detail.html', context )
 
 
 def cart(request):
-    return render(request, 'customer/cart.html')
+    cart_items = Cart.objects.filter(customer = request.session['customer'])
+
+    disable_checkout = False
+    for item in cart_items:
+        print(item.product.product_name, item.product.stock)
+        if item.product.stock == 0:
+            disable_checkout = True
+            print(item.product.product_name,'not available')
+       
+    return render(request, 'customer/cart.html', {'cart_items': cart_items, 'disable_checkout': disable_checkout})
 
 
 def place_order(request):

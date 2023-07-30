@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from customer.models import Seller
+from  seller.models import Seller
 from .models import EkartAdmin,Category
 from random import randint
 from django.core.mail import send_mail

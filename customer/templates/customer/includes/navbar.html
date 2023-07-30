@@ -38,12 +38,12 @@
                 </button>
                 <div class="dropdown-menu">
                     {% for item in category_list %}
-                    <a class="dropdown-item" href="#">{{ item.category }} </a>
+                    <a class="dropdown-item" href="{% url 'customer:store' %}?query={{ item.id }}">{{ item.category }} </a>
                     {% endfor %}
                 </div>
             </div>  <!-- category-wrap.// -->
         </div> <!-- col.// -->
-        <a href="{% url 'customer:store' %}" class="btn btn-outline-primary">Store</a>
+        <a href="{% url 'customer:store' %}?query=all" class="btn btn-outline-primary">Store</a>
         <div class="col-lg  col-md-6 col-sm-12 col">
             <form action="#" class="search">
                 <div class="input-group w-100">

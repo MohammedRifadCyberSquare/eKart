@@ -1,4 +1,5 @@
 from django.db import models
+from seller.models import Product
 
 # Create your models here.
 
@@ -16,24 +17,11 @@ class Customer(models.Model):
         db_table = 'customer_tb'
 
 
-class Seller(models.Model):
-    first_name = models.CharField(max_length =  20)
-    last_name =  models.CharField(max_length =  20)
-    company_name = models.CharField(max_length = 20)
-    email =  models.CharField(max_length =  50)
-    gender = models.CharField(max_length = 10)
-    city = models.CharField(max_length = 20)
-    country = models.CharField(max_length = 20)
-    password = models.CharField(max_length = 20)
-    pic = models.ImageField(upload_to = 'seller/')
-    login_id = models.IntegerField(null = True)
-    password = models.CharField(max_length = 20)
-    account_no = models.BigIntegerField()
-    bank_name = models.CharField(max_length = 20)
-    branch_name = models.CharField(max_length = 20)
-    ifsc = models.CharField(max_length = 20)
 
-    status = models.CharField(max_length = 20, default = 'pending')
+
+class Cart(models.Model):
+    customer = models.ForeignKey(Customer, on_delete = models.CASCADE)
+    product = models.ForeignKey(Product, on_delete = models.CASCADE)
 
     class Meta:
-        db_table = 'seller_tb'
+        db_table = 'cart_tb'

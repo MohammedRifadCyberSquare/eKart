@@ -30,7 +30,7 @@
         {% for item in category_list %}
         <div class="col-md-3">
             <div class="card card-product-grid">
-                <a href="{% url 'customer:product_detail' %}" class="img-wrap"> <img src="{{ item.cover_pic.url }}"> </a>
+                <a href="{% url 'customer:store' %}?query={{ item.id }}" class="img-wrap"> <img src="{{ item.cover_pic.url }}"> </a>
                 <figcaption class="info-wrap">
                     <p> {{ item.category }}
                     

@@ -1,0 +1,29 @@
+{% extends 'seller/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<main class="col-md-9">
+   <h1>My products</h1>
+   <div class="container-fluid">
+      <div class="row">
+
+         
+           
+         {% for item in products %}
+          <div class="card col-md-4 d-inline-block m-2">
+            <img src="{{ item.image.url  }}" height = "160px" class="card-img-top" >
+            <div class="card-body">
+               <h5>{{ item.product_name | title }}</h5>
+               <h5>Available stock : {{ item.stock }}</h5>
+            </div>
+          </div>
+
+          {% endfor %}
+      </div>
+   </div>
+</main>
+
+
+{% endblock %}

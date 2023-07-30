@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from eKart_admin.models import Category
 from django.core.exceptions import ObjectDoesNotExist
-from customer.models import Seller
+from .models import Seller
 from seller.models import Product
 
 
@@ -28,10 +28,10 @@ def add_product(request):
              
         product, created = Product.objects.get_or_create(product_no = product_no, seller = seller, defaults = {
             'product_no': product_no, 
-            'product_name': product_name,
+            'product_name': product_name.lower(),
             'seller': Seller.objects.get(id = seller),
             'category': Category.objects.get(id = category),
-            'description': description,
+            'description': description.lower(),
             'stock': stock,
             'price': price,
             'image': image,
@@ -60,8 +60,8 @@ def view_category(request):
     return render(request, 'seller/view_category.html')
 
 def view_products(request):
-     
-    return render(request, 'seller/view_product.html')
+    products = Product.objects.filter(seller = request.session['seller'])
+    return render(request, 'seller/product_catalogue.html', {'products': products,})
 
 def profile(request):
     return render(request,'seller/profile.html')
