@@ -62,7 +62,7 @@
                                     </div> <!-- price-wrap .// -->
                                 </td>
                                 <td class="text-right">
-                                    <a href="" class="btn btn-danger"> Remove</a>
+                                    <a href="{% url 'customer:remove_cart_item' item.id %}" class="btn btn-danger"> Remove</a>
                                 </td>
                             </tr>
 
@@ -90,7 +90,8 @@
                         <p class="text-center mb-3">
                             <img src="{% static './images/misc/payments.png' %}" height="26">
                         </p>
-                        <button type="submit" class="btn btn-primary btn-block" disabled="{{ disable_checkout }}"> Checkout </button>
+                       
+                        <button type="submit" class="btn btn-primary btn-block"  {{ disable_checkout }} > Checkout </button>
                         <a href="{% url 'customer:store' %}" class="btn btn-light btn-block">Continue Shopping</a>
                     </div> <!-- card-body.// -->
                 </div> <!-- card.// -->

@@ -76,14 +76,15 @@ def cart(request):
     cart_items = Cart.objects.filter(customer = request.session['customer'])
     grand_total = 0
     
-    disable_checkout = False
+    disable_checkout = ''
     for item in cart_items:
         print(item.product.product_name, item.product.stock)
         grand_total += item.product.price
         if item.product.stock == 0:
-            disable_checkout = True
+            disable_checkout = 'disabled'
             print(item.product.product_name,'not available')
 
+    print(disable_checkout)
     context = {
         'cart_items': cart_items, 
         'disable_checkout': disable_checkout, 
@@ -91,6 +92,15 @@ def cart(request):
         'total_items': cart_items.count()
         }  
     return render(request, 'customer/cart.html', context)
+
+def remove_cart_item(request, cart_id):
+
+    try:
+        selected_cart_item = Cart.objects.get(id = cart_id)
+        selected_cart_item.delete()
+    except:
+        pass
+    return redirect('customer:cart')
 
 
 def place_order(request):

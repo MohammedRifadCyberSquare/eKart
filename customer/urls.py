@@ -13,6 +13,8 @@ urlpatterns = [
    path('dashboard',views.dashboard,name='dasboard'),
    path('seller/register',views.seller_register,name='seller_register'),
    path('seller/login',views.seller_login,name='seller_login'),
+   path('cart/item/remove/<int:cart_id>',views.remove_cart_item,name='remove_cart_item'),
+
    path('customer/signup',views.customer_signup,name='customer_signup'),
    path('customer/login',views.customer_login,name='customer_login'),
    path('forgotPassword/customer',views.forgot_password_customer,name='forgot_password_customer'),
