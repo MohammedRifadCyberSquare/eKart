@@ -74,15 +74,23 @@ def product_detail(request, product_id):
 
 def cart(request):
     cart_items = Cart.objects.filter(customer = request.session['customer'])
-
+    grand_total = 0
+    
     disable_checkout = False
     for item in cart_items:
         print(item.product.product_name, item.product.stock)
+        grand_total += item.product.price
         if item.product.stock == 0:
             disable_checkout = True
             print(item.product.product_name,'not available')
-       
-    return render(request, 'customer/cart.html', {'cart_items': cart_items, 'disable_checkout': disable_checkout})
+
+    context = {
+        'cart_items': cart_items, 
+        'disable_checkout': disable_checkout, 
+        'grand_total': grand_total,
+        'total_items': cart_items.count()
+        }  
+    return render(request, 'customer/cart.html', context)
 
 
 def place_order(request):
