@@ -139,3 +139,7 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'mohammedrifad17@gmail.com'
 EMAIL_HOST_PASSWORD = 'qznrolekvqxhlzwf'
 
+ 
+
+RAZORPAY_API_KEY = 'rzp_test_mFU2QakcmR7iZC'
+RAZORPAY_API_SECRET = 'CYhZdVAseN1lH3yvUgY8Y9Ld'

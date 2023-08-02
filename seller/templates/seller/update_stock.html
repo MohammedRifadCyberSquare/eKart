@@ -14,39 +14,39 @@
                 <header class="mb-4">
                     <h4 class="card-title">update_stock</h4>
                 </header>
-                <form action="" method="" enctype="multipart/form-data">
 
-                    <div class=" form-group">
-                        <label>Enter product No</label>
-                        <input type="text" class="form-control" name="product_name">
+
+                <div class=" form-group">
+                    <label>Enter product No</label>
+                    <input type="text" class="form-control" id="txtPno" name="product_no">
+                </div> <!-- form-group end.// -->
+                <div class=" form-group">
+                    <label>Product name</label>
+                    <input type="text" readonly class="form-control" id="txtPname" name="product_name">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label>Avilable stock</label>
+                        <input type="number" readonly class="form-control" id="txtCurrentStock" name="current_stock">
                     </div> <!-- form-group end.// -->
-                    <div class=" form-group">
-                        <label>Product name</label>
-                        <input type="text" class="form-control" name="product_name">
-                    </div>
+                </div> <!-- form-row.// -->
 
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label>Avilable stock</label>
-                            <input type="number" class="form-control" name="stock">
-                        </div> <!-- form-group end.// -->
-                    </div> <!-- form-row.// -->  
-                    
-                    <div class="form-row">
-                        <div class="form-group col-md-12">
-                            <label>New stock</label>
-                            <input type="number" class="form-control" name="stock">
-                        </div> <!-- form-group end.// -->
-                    </div> <!-- form-row.// --> 
+                <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label>New stock</label>
+                        <input type="number" min="1" class="form-control" id="txtNewStock" name="new_stock">
+                    </div> <!-- form-group end.// -->
+                </div> <!-- form-row.// -->
 
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary btn-block"> Update </button>
-                    </div> <!-- form-group// -->
+                <div class="form-group">
+                    <button type="submit" disabled id="btn_update" class="btn btn-primary btn-block"> Update </button>
+                </div> <!-- form-group// -->
+                <span id="span_msg"></span>
 
-                </form>
             </article><!-- card-body.// -->
         </div> <!-- card .// -->
-        
+
         <br><br>
         <!-- ============================ COMPONENT REGISTER  END.// ================================= -->
 
@@ -56,6 +56,128 @@
 
 
 </main>
+
+
+<script src="https://code.jquery.com/jquery-3.7.0.js" integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM="
+    crossorigin="anonymous"></script>
+
+<script>
+
+  
+    var ajax_call = function () {
+
+        $.ajaxSetup({
+            headers: {
+                "X-CSRFToken": '{{ csrf_token}}'
+            }
+        })
+
+
+        $.ajax({
+
+            url: "{% url 'Seller:get_stock_details' %}",
+            method: 'POST',
+            data: {
+                productNo: $('#txtPno').val()
+            },
+
+            success: function (response) {
+
+ 
+console.log(response.product_exist);
+                 
+                if (response.product_exist == true) {
+                    
+                    let product_name = response.product_name
+                    let current_stock = response.stock
+                    $('#txtPname').val(product_name)
+                    $('#txtCurrentStock').val(current_stock)
+                    $('#btn_update').removeAttr('disabled')
+
+                }
+
+                else {
+                    $('#pName').val('')
+                    $('#txtCurrentStock').val('')
+                    $('#btn_update').attr('disabled', true)
+
+                }
+
+            }
+        })
+
+
+    }
+    $('#txtPno').keyup(function () {
+
+     
+
+        ajax_call()
+
+
+
+
+    })
+
+
+
+    $('#btn_update').click(function () {
+
+        let new_stock = $('#txtNewStock').val()
+        let product_no = $('#txtPno').val()
+
+
+        if (parseInt(new_stock) > 0) {
+
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token}}'
+                }
+            })
+
+            $.ajax({
+
+                url: "{% url 'Seller:update_stock' %}",
+                method: 'POST',
+                data: {
+                    productNo: $('#txtPno').val(),
+                    newStock: $('#txtNewStock').val()
+                },
+
+                success: function (response) {
+
+                        let status = response.status
+                        let updated_stock = response.updated_stock
+
+                        if(status == true){
+                         $('#txtCurrentStock').val(updated_stock) 
+                         $('#txtNewStock').val('') 
+                         Swal.fire('Stock Updated')
+
+                         setTimeout(() => {
+                         $('#span_msg').html('')
+                            
+                         }, 3000);
+                        }
+                }
+            })
+
+
+
+        }
+        else {
+            alert('Please enter new stock')
+        }
+
+
+    })
+
+
+
+
+
+
+</script>
 
 
 {% endblock %}

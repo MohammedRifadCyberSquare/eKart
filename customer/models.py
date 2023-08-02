@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import date
 from seller.models import Product
 
 # Create your models here.
@@ -22,6 +23,53 @@ class Customer(models.Model):
 class Cart(models.Model):
     customer = models.ForeignKey(Customer, on_delete = models.CASCADE)
     product = models.ForeignKey(Product, on_delete = models.CASCADE)
+    quantity = models.IntegerField(default = 1)
+    price = models.FloatField()
+
 
     class Meta:
         db_table = 'cart_tb'
+
+
+class DeliveryAddress(models.Model):
+    customer = models.ForeignKey(Customer, on_delete = models.CASCADE)
+    first_name = models.CharField(max_length =  20)
+    last_name =  models.CharField(max_length =  20)
+    email =  models.CharField(max_length =  50)
+    phone =  models.BigIntegerField()
+    state =  models.CharField(max_length =  50)
+    district =  models.CharField(max_length =  50)
+    city =  models.CharField(max_length =  50)
+    landmark =  models.CharField(max_length =  50)
+    house_name =  models.CharField(max_length =  50)
+    pin_code =  models.IntegerField()
+
+    class Meta:
+        db_table = 'address_tb'
+
+
+
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete = models.CASCADE)
+    order_id = models.CharField(max_length = 25, unique = True)
+    order_no = models.CharField(max_length = 40)
+    total_amount = models.DecimalField(max_digits = 10, decimal_places = 2)
+    payment_status = models.BooleanField(default = False)
+    created_at = models.DateField(default = date.today)
+    payment_id = models.CharField(max_length = 25, unique = True, null = True)
+    signature_id = models.CharField(max_length = 25, unique = True, null = True)
+    order_status = models.CharField(max_length = 20, null = True)
+    shipping_address = models.ForeignKey(DeliveryAddress, on_delete = models.SET_NULL, null = True)
+
+    class Meta:
+        db_table = 'order_tb'
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, on_delete = models.CASCADE)
+    product = models.ForeignKey(Product, on_delete = models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    price = models.DecimalField(max_digits = 10, decimal_places = 2)
+
+    class Meta:
+        db_table = 'orderItem_tb'

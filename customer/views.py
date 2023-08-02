@@ -1,8 +1,15 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from eKart_admin.models import Category
 from django.shortcuts import get_object_or_404  
-from .models import Customer,Cart
+from .models import Customer,Cart, DeliveryAddress, Order, OrderItem
 from seller.models import Product, Seller
+import razorpay
+from random import randint
+from django.db.models import F
+from django.http import JsonResponse
+from django.conf import settings
+from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 
@@ -45,9 +52,9 @@ def product_detail(request, product_id):
   
 
     if request.method == 'POST':
-        cart = Cart(customer = customer, product = product)
+        cart = Cart(customer = customer, product = product, price = product.price)
         cart.save()
-        return redirect('customer:cart')
+        return redirect('customer:cart',current_view = 'list')
              
    
     
@@ -72,26 +79,83 @@ def product_detail(request, product_id):
     return render(request, 'customer/product_detail.html', context )
 
 
-def cart(request):
+def cart(request, current_view):
     cart_items = Cart.objects.filter(customer = request.session['customer'])
     grand_total = 0
-    
+    customer = request.session['customer']
     disable_checkout = ''
+    cart = Cart.objects.filter(customer = request.session['customer']).annotate(grand_total = F('quantity') * F('product__price') )
+    
+    for item in cart:
+        grand_total += item.grand_total
+    
+
+    if not cart_items:
+         disable_checkout = 'disabled'
     for item in cart_items:
-        print(item.product.product_name, item.product.stock)
-        grand_total += item.product.price
+       
+         
         if item.product.stock == 0:
             disable_checkout = 'disabled'
             print(item.product.product_name,'not available')
 
-    print(disable_checkout)
+     
     context = {
         'cart_items': cart_items, 
         'disable_checkout': disable_checkout, 
         'grand_total': grand_total,
-        'total_items': cart_items.count()
-        }  
+        'total_items': cart_items.count(),
+        
+        }
+
+    if request.method == 'POST':
+        first_name = request.POST['fname']
+        last_name = request.POST['lname']
+        phone = request.POST['phone']
+        email = request.POST['email']
+        state = request.POST['state']
+        landmark = request.POST['landmark']
+        house = request.POST['house']
+        zipcode = request.POST['pincode']
+        delivery_address = DeliveryAddress(first_name = first_name, last_name = last_name, email = email,
+                                           customer_id = customer,state = state, landmark = landmark, phone = phone, house_name = house, pin_code = zipcode)
+        
+        delivery_address.save()
+        
+    if current_view == 'review':
+        try:
+            address_history = DeliveryAddress.objects.filter(customer = customer)
+
+        except Exception as e:
+            print(e)
+            address_history = None
+        if address_history:
+            print(address_history)
+            context['address_history'] = address_history
+        return render(request, 'customer/cart_review.html', context)
+    
+
     return render(request, 'customer/cart.html', context)
+
+
+def update_cart(request):
+     
+    product_id = request.POST['id']
+    qty = request.POST['qty']
+    print(qty)
+    grand_total = 0
+    cart = Cart.objects.get(product = product_id)
+    cart.quantity = qty
+    cart.save()
+
+    cart = Cart.objects.filter(customer = request.session['customer']).annotate(grand_total = F('quantity') * F('product__price') )
+    
+    for item in cart:
+        grand_total += item.grand_total
+    
+    # item_price = cart.product.price
+    return JsonResponse({'status': 'Quantity updated', 'grand_total': grand_total})
+
 
 def remove_cart_item(request, cart_id):
 
@@ -103,12 +167,81 @@ def remove_cart_item(request, cart_id):
     return redirect('customer:cart')
 
 
+def review_cart(request):
+    cart_items = Cart.objects.filter(customer = request.session['customer'])
+    return render(request, 'customer/cart_review.html',{'cart_items': cart_items,})
+
+
 def place_order(request):
     return render(request, 'customer/place_order.html')
 
 
-def order_complete(request):
-    return render(request, 'customer/order_complete.html')
+def order_product(request):
+    cart = Cart.objects.filter(customer = request.session['customer']).annotate(grand_total = F('quantity') * F('product__price') )
+
+    customer = request.session['customer']
+    grand_total = 0
+    for item in cart:
+       grand_total += item.grand_total
+    
+    order_amount = grand_total
+    order_currency = 'INR'
+    order_receipt ='order_rcptid_11'
+    notes = {'shipping address':'bommanahalli,bangalore'}
+
+     
+
+    order_no = 'OD-Ekart-' + str(randint(1111111111,9999999999))
+     
+    client = razorpay.Client(auth=(settings.RAZORPAY_API_KEY ,settings.RAZORPAY_API_SECRET))
+    payment = client.order.create({
+            'amount': order_amount * 100,
+            'currency':order_currency,
+            'receipt':order_receipt,
+            'notes':notes,
+             
+        })
+    
+    order = Order(customer_id = customer, order_id = payment['id'], total_amount = grand_total, order_no = order_no )
+    order.save()
+    print(payment)
+    return JsonResponse({'payment': payment})
+
+@csrf_exempt
+def update_payment(request, shipping_address):
+    
+    if request.method == 'GET':
+        return redirect('customer:customer_home')
+
+    order_id = request.POST['razorpay_order_id']
+    payment_id = request.POST['razorpay_payment_id']
+    signature = request.POST['razorpay_signature']
+    client = razorpay.Client(auth = (settings.RAZORPAY_API_KEY, settings.RAZORPAY_API_SECRET))
+    params_dict = {
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": signature
+        }
+    signature_valid = client.utility.verify_payment_signature(params_dict)
+    if signature_valid:
+    
+        order_details = Order.objects.get(order_id = order_id)
+        order_details.payment_status = True
+        order_details.payment_id = payment_id
+        order_details.signature_id = signature
+        order_details.shipping_address_id = shipping_address
+        order_details.order_status = 'order placed'
+        cart = Cart.objects.filter(customer = request.session['customer'])
+
+        for item in cart:
+            order_item = OrderItem(order_id = order_details.id, product_id = item.product.id, quantity = item.quantity, price = item.price )
+            order_item.save()
+
+   
+        order_details.save()
+        cart.delete()
+  
+    return render(request, 'customer/order_complete.html', {'invoice_details': '', 'order_details': order_details})
 
 
 def dashboard(request):
