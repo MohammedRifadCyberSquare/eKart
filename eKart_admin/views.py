@@ -32,6 +32,8 @@ def view_category(request):
 
 def add_category(request):
     message = ''
+    
+
     if request.method == 'POST':
         category = request.POST['category_name'].lower()
         description = request.POST['description']
@@ -43,9 +45,10 @@ def add_category(request):
             category = Category(category = category, description = description, cover_pic = cover_pic)
             category.save()
             message = 'Category Added'
+            
         else:
             message = 'Already Added'
-    return render(request,'ekart_admin/add_category.html', {'message': message})
+    return render(request,'ekart_admin/add_category.html', {'message': message, })
 
 
 def approve_seller(request,id):

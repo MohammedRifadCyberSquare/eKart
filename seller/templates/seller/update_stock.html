@@ -18,8 +18,15 @@
 
                 <div class=" form-group">
                     <label>Enter product No</label>
-                    <input type="text" class="form-control" id="txtPno" name="product_no">
-                </div> <!-- form-group end.// -->
+                    <select class="form-control" name="product_no" id="productNo">
+                        <option selected disabled> Select</option>
+                        {% for product in list %}
+                        <option value="{{ product.id }}">{{ product.product_no }} - {{ product.product_name | title }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                </div>
                 <div class=" form-group">
                     <label>Product name</label>
                     <input type="text" readonly class="form-control" id="txtPname" name="product_name">
@@ -40,7 +47,7 @@
                 </div> <!-- form-row.// -->
 
                 <div class="form-group">
-                    <button type="submit" disabled id="btn_update" class="btn btn-primary btn-block"> Update </button>
+                    <button type="submit"  id="btnUpdate" class="btn btn-primary btn-block"> Update </button>
                 </div> <!-- form-group// -->
                 <span id="span_msg"></span>
 
@@ -63,12 +70,13 @@
 
 <script>
 
-  
+
     var ajax_call = function () {
 
+        console.log($('#productNo').val())
         $.ajaxSetup({
             headers: {
-                "X-CSRFToken": '{{ csrf_token}}'
+                "X-CSRFToken": '{{ csrf_token }}'
             }
         })
 
@@ -78,39 +86,31 @@
             url: "{% url 'Seller:get_stock_details' %}",
             method: 'POST',
             data: {
-                productNo: $('#txtPno').val()
+                productId: $('#productNo').val()
             },
 
             success: function (response) {
 
- 
-console.log(response.product_exist);
+
+                console.log(response.product_exist);
+
+
+
+                let product_name = response.product_name
+                let current_stock = response.stock
+                $('#txtPname').val(product_name)
+                $('#txtCurrentStock').val(current_stock)
                  
-                if (response.product_exist == true) {
-                    
-                    let product_name = response.product_name
-                    let current_stock = response.stock
-                    $('#txtPname').val(product_name)
-                    $('#txtCurrentStock').val(current_stock)
-                    $('#btn_update').removeAttr('disabled')
 
-                }
-
-                else {
-                    $('#pName').val('')
-                    $('#txtCurrentStock').val('')
-                    $('#btn_update').attr('disabled', true)
-
-                }
 
             }
         })
 
 
     }
-    $('#txtPno').keyup(function () {
+    $('#productNo').change(function () {
 
-     
+
 
         ajax_call()
 
@@ -121,17 +121,17 @@ console.log(response.product_exist);
 
 
 
-    $('#btn_update').click(function () {
+    $('#btnUpdate').click(function () {
 
         let new_stock = $('#txtNewStock').val()
-        let product_no = $('#txtPno').val()
+        let product_no = $('#productNo').val()
 
-
+        console.log('clicked');
         if (parseInt(new_stock) > 0) {
 
             $.ajaxSetup({
                 headers: {
-                    "X-CSRFToken": '{{ csrf_token}}'
+                    "X-CSRFToken": '{{ csrf_token }}'
                 }
             })
 
@@ -140,25 +140,25 @@ console.log(response.product_exist);
                 url: "{% url 'Seller:update_stock' %}",
                 method: 'POST',
                 data: {
-                    productNo: $('#txtPno').val(),
+                    productId: $('#productNo').val(),
                     newStock: $('#txtNewStock').val()
                 },
 
                 success: function (response) {
 
-                        let status = response.status
-                        let updated_stock = response.updated_stock
+                    let status = response.status
+                    let updated_stock = response.updated_stock
 
-                        if(status == true){
-                         $('#txtCurrentStock').val(updated_stock) 
-                         $('#txtNewStock').val('') 
-                         Swal.fire('Stock Updated')
+                    if (status == true) {
+                        $('#txtCurrentStock').val(updated_stock)
+                        $('#txtNewStock').val('')
+                        Swal.fire('Stock Updated')
 
-                         setTimeout(() => {
-                         $('#span_msg').html('')
-                            
-                         }, 3000);
-                        }
+                        setTimeout(() => {
+                            $('#span_msg').html('')
+
+                        }, 3000);
+                    }
                 }
             })
 

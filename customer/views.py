@@ -1,10 +1,14 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from eKart_admin.models import Category
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404  
 from .models import Customer,Cart, DeliveryAddress, Order, OrderItem
 from seller.models import Product, Seller
 import razorpay
+from django.utils.html import strip_tags
+from datetime import datetime
+from django.template.loader import render_to_string
 from random import randint
 from django.db.models import F
 from django.http import JsonResponse
@@ -234,14 +238,46 @@ def update_payment(request, shipping_address):
         cart = Cart.objects.filter(customer = request.session['customer'])
 
         for item in cart:
-            order_item = OrderItem(order_id = order_details.id, product_id = item.product.id, quantity = item.quantity, price = item.price )
+            order_item = OrderItem(order_id = order_details.id, product_id = item.product.id, quantity = item.quantity, price = item.product.price )
             order_item.save()
+            selected_qty = item.quantity
+            selected_product = Product.objects.get(id = item.product.id)
+            selected_product.stock -= selected_qty
+            selected_product.save()
+            
 
    
         order_details.save()
         cart.delete()
-  
-    return render(request, 'customer/order_complete.html', {'invoice_details': '', 'order_details': order_details})
+
+        customer_name = request.session['customer_name']
+        order_number =  order_details.order_no
+        current_year = datetime.now().year
+        
+        subject = "Order Confirmation"
+        from_email = settings.EMAIL_HOST_USER
+
+        to_email = ['athira@cybersquare.org']
+
+        
+        address = DeliveryAddress.objects.get(customer = request.session['customer'], id = shipping_address)
+        html_content = render_to_string('customer/invoice.html', {
+        'customer_name': customer_name,
+        'order_no': order_number,
+        'order_date': order_details.created_at,
+        'current_year': current_year,
+        'address': address,
+        'grand_total': order_details.total_amount
+        
+        })
+            
+        msg = EmailMultiAlternatives(subject, html_content, from_email, to_email)
+        msg.attach_alternative(html_content, "text/html")
+
+ 
+        msg.send()
+    
+    return render(request, 'customer/order_complete.html',  )
 
 
 def dashboard(request):
@@ -369,3 +405,9 @@ def forgot_password_customer(request):
 
 def forgot_password_seller(request):
     return render(request, 'customer/forgot_password_seller.html')
+
+def my_orders(request):
+    
+    orders = Order.objects.filter(customer = request.session['customer'])
+    return render(request, 'customer/my_orders.html', {'order_list': orders})
+    

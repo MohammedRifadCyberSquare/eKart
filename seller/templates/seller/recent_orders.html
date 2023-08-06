@@ -1,0 +1,38 @@
+{% extends 'seller/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<main class="col-md-9">
+   {% if orders %}
+   <h1 class="text-danger text-center">Order History</h1>
+   <table class = "table table-hover mt-3">
+      <tr>
+         <th>Sl No</th>
+         <th>Order No</th>
+
+         <th>Order Date</th>
+         <th>Total Amount</th>
+
+      </tr>
+
+      {% for order_item in orders %}
+      <tr>
+         <td>{{ forloop.counter }}</td>
+         <td> {{ order_item.order.order_no }}</td>
+         <td> {{ order_item.order.created_at }}</td>
+         <td>{{ order_item.order.total_amount }}</td>
+         <td><a href="{% url 'Seller:order_items' order_item.order.order_no %}">View Items</a></td>
+
+      </tr>
+      {% endfor %}
+   </table>
+
+   {% else %}
+   <h2 class = "text-danger text-center">No Orders</h2>
+   {% endif %}
+</main>
+
+
+{% endblock %}

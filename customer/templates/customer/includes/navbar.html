@@ -28,7 +28,7 @@
     <div class="row align-items-center">
         <div class="col-lg-2 col-md-3 col-6">
             <a href="{% url 'customer:customer_home' %}" class="brand-wrap">
-                <img class="logo" src="{% static './images/logo.png' %}">
+                <img class=" " src="{% static './images/logo.png' %}" height = "80px" width = "100px">
             </a> <!-- brand-wrap.// -->
         </div>
         <div class="col-lg col-sm col-md col-6 flex-grow-0">
@@ -75,7 +75,7 @@
                         </div>
                         <a href="{% url 'customer:cart' 'list' %}" class="widget-header pl-3 ml-3">
                             <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-                            <span class="badge badge-pill badge-danger notify">0</span>
+                            <span class="badge badge-pill badge-danger notify">{{ cart_count }}</span>
                         </a>
                     </div> <!-- widgets-wrap.// -->
                 </div> <!-- col.// -->

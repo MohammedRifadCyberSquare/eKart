@@ -2,6 +2,7 @@ from django.shortcuts import render
 from eKart_admin.models import Category
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Seller
+from customer.models import OrderItem
 from django.http import JsonResponse
 from seller.models import Product
 
@@ -72,13 +73,15 @@ def view_orders(request):
 
 def update_stock(request):
 
+    product_list = Product.objects.filter(seller = request.session['seller']).values('id','product_no','product_name')
+    print(product_list, '999')
     if request.method == 'POST':
-        product_no = request.POST['productNo']
+        product_id= request.POST['productId']
         new_stock = request.POST['newStock']
 
-        print(product_no, new_stock)
+        print(product_id, new_stock)
 
-        selected_product = Product.objects.get(product_no = product_no, seller = request.session['seller']) 
+        selected_product = Product.objects.get(id = product_id, seller = request.session['seller']) 
         new_stock = selected_product.stock + int(new_stock)
         selected_product.stock = new_stock
         selected_product.save()
@@ -86,18 +89,24 @@ def update_stock(request):
         return JsonResponse({'status': True, 'updated_stock': new_stock})
 
 
-    return render(request,'seller/update_stock.html')
+    return render(request,'seller/update_stock.html', {'list': product_list})
 
 def get_stock_details(request):
-    product_no = request.POST['productNo']
-    product = Product.objects.filter(product_no = product_no, seller = request.session['seller']).values('product_name','stock')
-    if product:
-        product_name = product[0]['product_name']
-        current_stock = product[0]['stock']
-        return JsonResponse({'product_exist': True,'product_name': product_name, 'stock': current_stock})
-    else:
-        print(product_no, 'does not exist')
-        return JsonResponse({'product_exist': False,})
+    product_id = request.POST['productId']
+    product = Product.objects.filter(id = product_id).values('product_name','stock')
+    product_name = product[0]['product_name']
+    current_stock = product[0]['stock']
+    return JsonResponse({'product_name': product_name, 'stock': current_stock})
+     
+
+def recent_orders(request):
+    orders = OrderItem.objects.filter(product__seller = request.session['seller'], order__order_status = 'order placed' )
+    return render(request,'seller/recent_orders.html', {'orders': orders})
 
 def order_history(request):
     return render(request,'seller/order_history.html')
+
+def order_items(request, order_no):
+    items = OrderItem.objects.filter(order__order_no = order_no)
+    order_no = items[0].order.order_no
+    return render(request,'seller/order_items.html', {'items': items, 'order_no': order_no})
