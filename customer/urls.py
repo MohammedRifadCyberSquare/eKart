@@ -11,6 +11,10 @@ urlpatterns = [
    path('placeOrder',views.place_order,name='place_order'),
    path('order/complete/<int:shipping_address>',views.update_payment,name='update_payment'),
    path('dashboard',views.dashboard,name='dasboard'),
+   path('product/review/<int:id>',views.product_review,name='product_review'),
+   path('profile/view',views.profile,name='profile'),
+   path('product/question/post/<int:product_id>',views.add_product_qstn,name='add_product_qstn'),
+
    path('seller/register',views.seller_register,name='seller_register'),
    path('seller/login',views.seller_login,name='seller_login'),
    path('cart/item/remove/<int:cart_id>',views.remove_cart_item,name='remove_cart_item'),

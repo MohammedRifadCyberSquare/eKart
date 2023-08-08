@@ -60,11 +60,11 @@
                             </div> <!-- img-wrap.// -->
                             <figcaption class="info-wrap">
                                 <div class="fix-height">
-                                    <a href=" " class="title">Great item name goes
-                                        here</a>
+                                    <a href=" " class="title"> {{ item.product_name | title }}</a>
                                     <div class="price-wrap mt-2">
-                                        <span class="price">$1280</span>
-                                        <del class="price-old">$1980</del>
+                                        <span class="price">Rs {{ item.price }}</span>
+                                        
+                                        <p>Seller: {{ item.seller.first_name }}</p>
                                     </div> <!-- price-wrap.// -->
                                 </div>
                                  

@@ -3,7 +3,9 @@ from django.urls import reverse
 from eKart_admin.models import Category
 from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404  
-from .models import Customer,Cart, DeliveryAddress, Order, OrderItem
+from .models import *
+from .rating import *
+from django.db.models import Count,ExpressionWrapper,FloatField
 from seller.models import Product, Seller
 import razorpay
 from django.utils.html import strip_tags
@@ -42,19 +44,25 @@ def store(request):
 
 
 def product_detail(request, product_id):
-    seller = request.session['seller']
-    message = ''
-     
     product = Product.objects.get(id = product_id)
     customer = Customer.objects.get(id = request.session['customer'])
     product = None
 
-    
+    questions = ProductQuestion.objects.filter(product = product_id)
     product = get_object_or_404(Product, id = product_id)
+
+    reviews =  ProductReview.objects.filter(product = product_id)
+    product_rating =reviews.values('rating').annotate(count = Count('rating'))
    
     
-  
+     
+    rating_list = get_rating(product_id)
 
+    review_count = ProductReview.objects.filter(product = product_id).count()
+    
+    
+    star_rating = get_star_rating(rating_list)
+    already_reviewed = ProductReview.objects.filter(customer = customer, product = product_id).exists()
     if request.method == 'POST':
         cart = Cart(customer = customer, product = product, price = product.price)
         cart.save()
@@ -77,7 +85,16 @@ def product_detail(request, product_id):
 
     context = {
         'product': product,
-        'item_exist': item_exist
+        'item_exist': item_exist,
+        'review_count': review_count,
+        'already_reviewed': already_reviewed,
+        'product_rating': product_rating,
+        'rating_list': rating_list,
+        'star_rating': star_rating,
+        'questions': questions,
+        'reviews': reviews
+         
+        
     }    
    
     return render(request, 'customer/product_detail.html', context )
@@ -238,7 +255,7 @@ def update_payment(request, shipping_address):
         cart = Cart.objects.filter(customer = request.session['customer'])
 
         for item in cart:
-            order_item = OrderItem(order_id = order_details.id, product_id = item.product.id, quantity = item.quantity, price = item.product.price )
+            order_item = OrderItem(order_id = order_details.id, customer_id =  request.session['customer'], product_id = item.product.id, quantity = item.quantity, price = item.product.price )
             order_item.save()
             selected_qty = item.quantity
             selected_product = Product.objects.get(id = item.product.id)
@@ -282,6 +299,36 @@ def update_payment(request, shipping_address):
 
 def dashboard(request):
     return render(request, 'customer/dashboard.html')
+
+def product_review(request,id):
+    purchased = OrderItem.objects.filter(product = id, customer = request.session['customer'] ).exists()
+    if request.method == 'POST':
+        customer = request.session['customer']
+        title = request.POST['title']
+        review = request.POST['customer_review']
+        star_count = request.POST['star_count']
+
+        customer_review = ProductReview(product_id = id, customer_id = customer,
+                                         title = title, review = review, rating = star_count)
+        customer_review.save()
+        if request.FILES:
+            for image in request.FILES.getlist('images'):
+                 
+                review_image = ReviewImage(review_id = customer_review.id, image = image)
+                review_image.save()
+        
+        rating_list = get_rating(id)
+        star_rating = get_star_rating(rating_list) 
+        Product.objects.filter(id = id).update(rating = star_rating)
+    return render(request, 'customer/product_review.html', {'purchased': purchased})
+
+def myorders(request):
+    return render(request, 'customer/my_orders.html',)
+
+
+def profile(request):
+    return render(request, 'customer/profile.html',)
+
 
 
 def seller_register(request):
@@ -411,3 +458,15 @@ def my_orders(request):
     orders = Order.objects.filter(customer = request.session['customer'])
     return render(request, 'customer/my_orders.html', {'order_list': orders})
     
+def add_product_qstn(request, product_id):
+
+    if request.method == 'POST':
+        question = request.POST['question']
+        
+        product_question = ProductQuestion(customer_id = request.session['customer'], 
+                                           product_id = product_id, question = question)
+        
+        product_question.save()
+
+        return redirect('customer:product_detail', product_id)
+    return render(request, 'customer/post_questions.html',)

@@ -35,6 +35,7 @@ class Product(models.Model):
     stock = models.IntegerField()
     price = models.FloatField()
     image = models.ImageField(upload_to = 'product/')
+    rating = models.FloatField(default = 0)
     status = models.CharField(max_length = 20, default = 'available')
     
     class Meta:

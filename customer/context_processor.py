@@ -16,4 +16,4 @@ def get_cart_count(request):
             count = 0
         return dict({'cart_count': count,})
     else:
-        return dict({'cart_count': None,})
+        return dict({'cart_count': 0})
