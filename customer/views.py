@@ -5,6 +5,7 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404  
 from .models import *
 from .rating import *
+from datetime import date
 from django.db.models import Count,ExpressionWrapper,FloatField
 from seller.models import Product, Seller
 import razorpay
@@ -13,6 +14,7 @@ from datetime import datetime
 from django.template.loader import render_to_string
 from random import randint
 from django.db.models import F
+from django.core.serializers import serialize
 from django.http import JsonResponse
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
@@ -45,7 +47,13 @@ def store(request):
 
 def product_detail(request, product_id):
     product = Product.objects.get(id = product_id)
-    customer = Customer.objects.get(id = request.session['customer'])
+    already_reviewed = False
+    try:
+        customer = Customer.objects.get(id = request.session['customer'])
+        already_reviewed = ProductReview.objects.filter(customer = customer, product = product_id).exists()
+    
+    except:
+        None
     product = None
 
     questions = ProductQuestion.objects.filter(product = product_id)
@@ -62,11 +70,17 @@ def product_detail(request, product_id):
     
     
     star_rating = get_star_rating(rating_list)
-    already_reviewed = ProductReview.objects.filter(customer = customer, product = product_id).exists()
     if request.method == 'POST':
-        cart = Cart(customer = customer, product = product, price = product.price)
-        cart.save()
-        return redirect('customer:cart',current_view = 'list')
+        if 'customer' in request.session:
+            cart = Cart(customer = customer, product = product, price = product.price)
+            cart.save()
+            return redirect('customer:cart',current_view = 'list')
+        
+        else:
+            target_url = reverse('customer:customer_login')
+             
+            redirect_url =  target_url + '?pid=' + str(product_id)
+            return redirect(redirect_url)
              
    
     
@@ -101,62 +115,69 @@ def product_detail(request, product_id):
 
 
 def cart(request, current_view):
-    cart_items = Cart.objects.filter(customer = request.session['customer'])
-    grand_total = 0
-    customer = request.session['customer']
-    disable_checkout = ''
-    cart = Cart.objects.filter(customer = request.session['customer']).annotate(grand_total = F('quantity') * F('product__price') )
-    
-    for item in cart:
-        grand_total += item.grand_total
-    
 
-    if not cart_items:
-         disable_checkout = 'disabled'
-    for item in cart_items:
-       
-         
-        if item.product.stock == 0:
+    if 'customer' in request.session:
+        print('*********')
+        cart_items = Cart.objects.filter(customer = request.session['customer'])
+        grand_total = 0
+        customer = request.session['customer']
+        disable_checkout = ''
+        cart = Cart.objects.filter(customer = request.session['customer']).annotate(grand_total = F('quantity') * F('product__price') )
+        
+        for item in cart:
+            grand_total += item.grand_total
+        
+
+        if not cart_items:
             disable_checkout = 'disabled'
-            print(item.product.product_name,'not available')
-
-     
-    context = {
-        'cart_items': cart_items, 
-        'disable_checkout': disable_checkout, 
-        'grand_total': grand_total,
-        'total_items': cart_items.count(),
+        for item in cart_items:
         
-        }
+            
+            if item.product.stock == 0:
+                disable_checkout = 'disabled'
+                print(item.product.product_name,'not available')
 
-    if request.method == 'POST':
-        first_name = request.POST['fname']
-        last_name = request.POST['lname']
-        phone = request.POST['phone']
-        email = request.POST['email']
-        state = request.POST['state']
-        landmark = request.POST['landmark']
-        house = request.POST['house']
-        zipcode = request.POST['pincode']
-        delivery_address = DeliveryAddress(first_name = first_name, last_name = last_name, email = email,
-                                           customer_id = customer,state = state, landmark = landmark, phone = phone, house_name = house, pin_code = zipcode)
         
-        delivery_address.save()
-        
-    if current_view == 'review':
-        try:
-            address_history = DeliveryAddress.objects.filter(customer = customer)
+        context = {
+            'cart_items': cart_items, 
+            'disable_checkout': disable_checkout, 
+            'grand_total': grand_total,
+            'total_items': cart_items.count(),
+            
+            }
 
-        except Exception as e:
-            print(e)
-            address_history = None
-        if address_history:
-            print(address_history)
-            context['address_history'] = address_history
-        return render(request, 'customer/cart_review.html', context)
+        if request.method == 'POST':
+            first_name = request.POST['fname']
+            last_name = request.POST['lname']
+            phone = request.POST['phone']
+            email = request.POST['email']
+            state = request.POST['state']
+            landmark = request.POST['landmark']
+            house = request.POST['house']
+            zipcode = request.POST['pincode']
+            delivery_address = DeliveryAddress(first_name = first_name, last_name = last_name, email = email,
+                                            customer_id = customer,state = state, landmark = landmark, phone = phone, house_name = house, pin_code = zipcode)
+            
+            delivery_address.save()
+            
+        if current_view == 'review':
+            try:
+                address_history = DeliveryAddress.objects.filter(customer = customer)
+
+            except Exception as e:
+                print(e)
+                address_history = None
+            if address_history:
+                print(address_history)
+                context['address_history'] = address_history
+            return render(request, 'customer/cart_review.html', context)
+        
+
+        return render(request, 'customer/cart.html', context)
+   
+    return render(request, 'customer/cart.html')
     
 
-    return render(request, 'customer/cart.html', context)
 
 
 def update_cart(request):
@@ -185,7 +206,7 @@ def remove_cart_item(request, cart_id):
         selected_cart_item.delete()
     except:
         pass
-    return redirect('customer:cart')
+    return redirect('customer:cart','list')
 
 
 def review_cart(request):
@@ -251,7 +272,7 @@ def update_payment(request, shipping_address):
         order_details.payment_id = payment_id
         order_details.signature_id = signature
         order_details.shipping_address_id = shipping_address
-        order_details.order_status = 'order placed'
+        order_details.order_status = 'order placed on ' + str(date.today())
         cart = Cart.objects.filter(customer = request.session['customer'])
 
         for item in cart:
@@ -274,7 +295,7 @@ def update_payment(request, shipping_address):
         subject = "Order Confirmation"
         from_email = settings.EMAIL_HOST_USER
 
-        to_email = ['athira@cybersquare.org']
+        to_email = ['suvarna@cybersquare.org']
 
         
         address = DeliveryAddress.objects.get(customer = request.session['customer'], id = shipping_address)
@@ -323,11 +344,16 @@ def product_review(request,id):
     return render(request, 'customer/product_review.html', {'purchased': purchased})
 
 def myorders(request):
-    return render(request, 'customer/my_orders.html',)
+    orders = OrderItem.objects.filter(customer = request.session['customer'])
+    print(orders)
+    return render(request, 'customer/my_orders.html', {'orders': orders})
 
 
 def profile(request):
-    return render(request, 'customer/profile.html',)
+
+    customer = Customer.objects.get(id = request.session['customer'])
+
+    return render(request, 'customer/profile.html', {'customer': customer,})
 
 
 
@@ -439,6 +465,9 @@ def customer_login(request):
             request.session['customer'] = customer[0].id
             request.session['customer_name'] = customer[0].first_name
 
+            if request.GET.get('pid'):
+                return redirect('customer:product_detail',request.GET.get('pid'))
+
             return redirect('customer:customer_home')
         else:
             message = 'Username or Password Incorrect'
@@ -455,8 +484,27 @@ def forgot_password_seller(request):
 
 def my_orders(request):
     
-    orders = Order.objects.filter(customer = request.session['customer'])
+    orders = OrderItem.objects.filter(customer = request.session['customer'])
+     
     return render(request, 'customer/my_orders.html', {'order_list': orders})
+
+def cancel_order(requets):
+    order_id = requets.POST['orderId']
+    reason = requets.POST['reason']
+    print(order_id, reason)
+    try:
+        order = OrderItem.objects.get(id = order_id)
+
+        order.cancellation_reason = reason
+        order.cancelled_date = date.today()
+        order.status = 'cancelled'
+        order.save()
+
+    except Exception as e:
+        print(e)
+        pass
+
+    return JsonResponse({'status': 200, 'message': 'Order Cancelled Succesfully'})
     
 def add_product_qstn(request, product_id):
 
@@ -470,3 +518,52 @@ def add_product_qstn(request, product_id):
 
         return redirect('customer:product_detail', product_id)
     return render(request, 'customer/post_questions.html',)
+
+
+def display_qstn_details(request):
+    qnstn_id = request.GET['qstnId']
+    answer_set = Answers.objects.filter(question = qnstn_id)
+     
+    serialized_data = [{'id': answer.id, 'answer': answer.answer, 'customer': answer.customer.first_name} for answer in  answer_set]
+
+    print(serialized_data)
+
+    return JsonResponse({'data': serialized_data,})
+
+def logout(request):
+    del request.session['customer']
+    request.session.flush()
+    return redirect('customer:customer_home')
+
+
+def update_customer_pofile(request):
+    customer = Customer.objects.get(id = request.session['customer'])
+    password_changed = False
+    last_changed_date = ''
+
+    if 'firstName' in request.POST:
+        customer.first_name = request.POST['firstName']
+
+    if 'lastName' in request.POST:
+        customer.last_name = request.POST['lastName']
+
+    if 'email' in request.POST:
+            print('emaail')
+            customer.email = request.POST['email']
+
+    if 'mobile' in request.POST:
+            print('emaail')
+            customer.mobile = request.POST['mobile']
+
+    if 'newPassword' in request.POST:
+            
+        customer.password = request.POST['newPassword']
+        customer.is_password_changed = True
+        customer.last_changed_on = date.today()
+        last_changed_date = date.today()
+        password_changed = True
+
+
+
+    customer.save()
+    return JsonResponse({'status': 200, })

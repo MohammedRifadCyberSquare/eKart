@@ -7,26 +7,44 @@
 <main class="col-md-9">
 
    {% if items %}
-   <h2 class=" text-center">Items for Order No : <span class="text-primary">{{ order_no }} </span> </h2>
+   <h3 class=" text-center">Items for Order No : <span class="text-primary">{{ order_no }} </span> </h3>
    <table class = "table table-hover mt-3">
       <tr>
          <th>Sl No</th>
          <th>Product</th>
         <th>Quantity</th>
          <th>Price</th>
+         <th>Status</th>
          
 
       </tr>
 
       {% for item in items %}
+
+      <form action="" method="POST">
+         {% csrf_token %}
       <tr>
          <td>{{ forloop.counter }}</td>
-         <td> {{ item.product.product_name }}</td>
+         <td> {{ item.product.product_name | title }}</td>
          <td>  {{ item.quantity }} No {{ item.quantity | pluralize }}</td>
-         <td> {{ item.price }}</td>
-         
+         <td>₹ {{ item.price }}</td>
+         <td>{{ item.status | title }}</td>
+         <td>
+            <select name="status" id="" class="form-control">
+            
+            <option value="packed">Packed</option>
+            <option value="out for delivery">Out for delivery</option>
+            <option value="delivered">Delivered</option>
 
+
+
+         </select></td>
+         {% if item.status != 'delivered' %}
+         <td><input type="submit" name="" id="" class="btn btn-danger" value="Update"></td>
+         {% endif %}
+         <td><input type="hidden" name="order_id" value="{{ item.id }}" id=""></td>
       </tr>
+   </form>
       {% endfor %}
    </table>
 

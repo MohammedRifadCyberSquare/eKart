@@ -36,8 +36,16 @@ def get_rating(product_id):
 def get_star_rating(list):
     sum = 0
     mul = 0
-    for i in list:
-        mul +=  i['rating'] * i['count']
-        sum += i['count']
-    star_rating = mul/sum
+    star_rating = 0
+    print(';lkk', list)
+    try:
+        for i in list:
+            mul +=  i['rating'] * i['count']
+            sum += i['count']
+    
+        
+        star_rating = mul/sum
+    except:
+        star_rating = 0
     return star_rating
+    return 0

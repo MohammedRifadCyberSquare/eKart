@@ -1,15 +1,24 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from eKart_admin.models import Category
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Seller
+from datetime import date
+
 from customer.models import OrderItem
+from django.db.models import Q
 from django.http import JsonResponse
 from seller.models import Product
 
 
 # Create your views here.
 def seller_home(request):
-    return render(request, 'seller/seller_home.html')
+    products = Product.objects.filter(seller = request.session['seller']).count()
+    orders = OrderItem.objects.filter(product__seller = request.session['seller'], status = 'order placed').count()
+    context = {
+        'product_count': products,
+        'orders': orders
+    }
+    return render(request, 'seller/seller_home.html', context)
 
 def add_product(request):
     category_list = Category.objects.all()
@@ -68,7 +77,36 @@ def view_products(request):
 def profile(request):
     return render(request,'seller/profile.html')
 
+def change_password(request):
+    status_msg = ''
+    if request.method  == 'POST':
+        old_password = request.POST['old_password']
+        new_password = request.POST['new_password']
+        confirm_password = request.POST['confirm_password']
+
+        try:
+            if len(new_password) > 8:
+                if new_password == confirm_password:
+                    seller = Seller.objects.get(id = request.session['seller'])
+                    if seller.password == old_password:
+                        seller.password = new_password
+                        seller.save()
+                        status_msg = 'Password Changed'
+
+                    else:
+                        status_msg = 'Password Incorrect'
+                else:
+                    status_msg = 'Password Does Not Match'
+            else:
+                status_msg = 'Password Should Be Minimum 8 Characters'
+
+
+        except:
+            status_msg = 'Incorrect Password'
+    return render(request, 'seller/change_password.html', {'msg': status_msg})
+
 def view_orders(request):
+
     return render(request,'seller/view_orders.html')
 
 def update_stock(request):
@@ -97,16 +135,65 @@ def get_stock_details(request):
     product_name = product[0]['product_name']
     current_stock = product[0]['stock']
     return JsonResponse({'product_name': product_name, 'stock': current_stock})
-     
+
+def update_order_status(request, order_id):
+   pass
 
 def recent_orders(request):
-    orders = OrderItem.objects.filter(product__seller = request.session['seller'], order__order_status = 'order placed' )
-    return render(request,'seller/recent_orders.html', {'orders': orders})
+    
+    orders = OrderItem.objects.filter(~Q(status = 'delivered'),product__seller = request.session['seller'] )
+    if request.method == 'POST':
+        try:
+            print('uuu')
+            order_status = request.POST['status'] 
+            order_id = request.POST['order_id'] 
+
+            order_item = OrderItem.objects.get(id = order_id)  
+            if order_status == 'delivered':
+                order_item.delivered_date = date.today()
+            
+            if order_status == 'packed':
+                order_item.packed_date = date.today()
+
+            if order_status == 'out for delivery':
+                order_item.delivery_out = date.today()
+            order_item.status = order_status
+            order_item.save()
+
+             
+        except Exception as e:
+            print(e)
+            None
+    return render(request,'seller/recent_orders.html', {'items': orders})
 
 def order_history(request):
     return render(request,'seller/order_history.html')
 
 def order_items(request, order_no):
-    items = OrderItem.objects.filter(order__order_no = order_no)
+    items = OrderItem.objects.filter(order__order_no = order_no, product__seller = request.session['seller'] )
     order_no = items[0].order.order_no
+    if request.method == 'POST':
+        try:
+             
+            order_status = request.POST['status'] 
+            order_id = request.POST['order_id'] 
+
+            print(order_status)
+            order_item = OrderItem.objects.get(id = order_id)  
+            if order_status == 'delivered':
+                order_item.delivered_date = date.today()
+
+            if order_status == 'packed':
+                order_item.packed_date = date.today()
+
+            if order_status == 'out for delivery':
+                order_item.delivery_out = date.today()
+             
+            order_item.status = order_status
+            order_item.save()
+
+             
+        except Exception as e:
+            print(e)
+            None
     return render(request,'seller/order_items.html', {'items': items, 'order_no': order_no})

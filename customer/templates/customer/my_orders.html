@@ -1,37 +1,207 @@
 {% extends 'customer/base.html' %}
+
+{% block header %}
+
+<style>
+
+    .ordered{
+        background-color: rgb(205, 235, 205);
+        border: 2px solid rgb(205, 235, 205);;
+    }
+
+
+    .packed{
+        background-color: rgb(152, 247, 152);
+        border: 2px solid rgb(152, 247, 152);
+    }
+    
+    .delivery-out{
+        background-color: olivedrab;
+        border: 2px solid olivedrab;
+    }
+
+    .delivered {
+        background-color: #26a541;
+        border: 2px solid #26a541;
+    }
+    .cancelled{
+        background-color: #ff6161;
+        border: 2px solid #ff6161;
+    }
+    
+    .status{
+        
+        height: 10px;
+        width: 10px;
+        border-radius: 50%;
+        background-color: none;
+        display: inline-block;
+        margin-right: 8px;
+    }
+</style>
+
+{% endblock %}
 {% load static %}
 
 {% block content %}
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
-            <h3 class="text-danger text-center mt-4">My Orders</h3>
-<table class="table table-hover mt-2">
-    <tr>
-        <td>Sl No</td>
-        <td>Order No</td>
-        <td>Order Date</td>
-        <td>Total Amount</td>
-        <td>Status</td>
-        <td></td>
-        <td></td>
-    </tr>
-    {% for order in order_list %}
+        <div class="col-md-12 mt-2">
+            <h3 class="text-danger text-center mb-3">My Orders</h3>
 
-    <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ order.order_no }}</td>
-        <td>{{ order.created_at }}</td>
-        <td> Rs {{ order.total_amount }}</td>
-        <td>{{ order.order_status }}</td>
-        <td><a href="">download invoice</a></td>
+            {% for order in order_list %}
 
-    </tr>
+            <div class="d-flex justify-content-between mt-2">
 
-    {% endfor %}
-</table>
+                <div>
+                    <img src="{{ order.product.image.url }}" height="100px" width="120px" alt="" srcset="">
+                </div>
+
+                <div style="width: 270px;">
+                    <span>  {{ order.product.product_name }}</span>
+                    <p>order no: <span style="color: blue;"> {{ order.order.order_no }}</span></p>
+
+                </div>
+
+                <div style="width: 200px; text-align: center;">
+                  <span>₹ {{ order.product.price }}</span>
+                </div>
+
+                <div style="width: 300px;">
+                    {% if order.status == 'order placed' %}
+                    <h6><span class="ordered status"></span> Ordered On {{ order.order.created_at }} </h6>
+                    <a href="" class="text-danger modal-open" data-orderId = "{{ order.id }}"  >Cancel Order</a>
+                    {% endif %}
+
+                    {% if order.status == 'packed' %}
+                    <h6><span class="packed status"></span> Item Packed on {{ order.packed_date }} </h6>
+                    <a href="" class="text-danger modal-open" data-orderId = "{{ order.id }}"  >Cancel Order</a>
+                    
+                    {% endif %}
+
+                    {% if order.status == 'out for delivery' %}
+                    <h6><span class="delivery-out status"></span> Out for delivery, {{ order.delivery_out }}</h6>
+                    
+                    
+                    {% endif %}
+
+                    {% if order.status == 'delivered' %}
+                    <h6><span class="delivered status"></span> Item Delivered On {{ order.delivered_date }} </h6>
+                    <span>your item has been delivered</span>
+                    <span class="d-block mt-2">
+                        
+                        <a href="">
+                            <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nMTYnIGhlaWdodD0nMTknIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB2aWV3Qm94PSIwIDAgMTggMTgiPgoJPGcgZmlsbD0nbm9uZSc+CgkJPHBvbHlnb24gaWQ9IlNoYXBlIiBmaWxsPSIjMjg3NEYxIiBwb2ludHM9IjkgMTIuMDYyNSAxMy42Mzc1IDE1LjQzNzUgMTEuODYyNSA5Ljk4NzUgMTYuNSA2LjY4NzUgMTAuODEyNSA2LjY4NzUgOSAxLjA2MjUgNy4xODc1IDYuNjg3NSAxLjUgNi42ODc1IDYuMTM3NSA5Ljk4NzUgNC4zNjI1IDE1LjQzNzUiIC8+CgkJPHBvbHlnb24gaWQ9IlNoYXBlIiBwb2ludHM9IjAgMCAxOCAwIDE4IDE4IDAgMTgiIC8+Cgk8L2c+Cjwvc3ZnPg==" class="_1dki8b col-1-5"><span class="_2YpB-X col-3-5">Rate &amp; Review Product</span></a>
+
+                    </span>
+                    {% endif %}
+                    {% if order.status == 'cancelled' %}
+                    <h6><span class="cancelled status"></span> Item cancelled On 08/08/2023 </h6>
+                     
+                    {% endif %}
+
+                   
+                   
+                </div>
+            </div>
+
+            {% endfor %}
+
 
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="cancelModal"   tabindex="-1" aria-labelledby="exampleModalLabel"
+                                aria-hidden="true">
+                                <div class="modal-dialog" style="max-width: 800px;">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title bold" id="selectedQstnText">Reason For Cancellation?</h5>
+                                            <button type="button" class="btn-close btn-danger" data-bs-dismiss="modal" aria-label="Close">x</button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div id="">
+                                                <ul class="list-unstyled">
+                                                    <li><input type="radio" checked class="mx-2" name="cancelReason" value="I have changed my mind" id="">I have changed my mind</li>
+                                                    <li><input type="radio" class="mx-2" name="cancelReason" value="I have purchased this product elswehere" id="">I have purchased this product elswehere</li>
+                                                    <li><input type="radio" class="mx-2" name="cancelReason" value="I want to cancel due to product quality issues" id="">I want to cancel due to product quality issues</li>
+
+                                                </ul>
+
+                                                <button type="button" id="orderCancelBtn" class="btn" style="background-color: rgba(231, 204, 65, 0.9);">Cancel Order</button>
+                                            
+                                            <div class="my-3">
+                                                <h6>Refund Status</h6>
+                                                <p>Amount will be trasferred within 1 business day <b>(Bank holidays not inluded)</b></p>
+                                            </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+
+
+<script>
+
+    var orderId;
+    var reasonRadio;
+
+    $('.modal-open').click(function(){
+        event.preventDefault()
+
+        console.log('clicked');
+          orderId = $(this).attr('data-orderId');
+
+          reasonRadio = $("input[name='cancelReason']") 
+          console.log(reasonRadio,'22');
+        $('#cancelModal').modal('show')
+        
+    })
+
+    $('#orderCancelBtn').click(function(){
+
+         
+        let cancelReason;
+        
+         console.log(reasonRadio,'ppp');
+        for (let i=0; i<reasonRadio.length;i++) {
+            if (reasonRadio[i].checked == true) {
+                cancelReason = reasonRadio[i].value
+                
+            }
+ 
+        }
+
+        console.log(orderId, cancelReason);
+
+        $.ajaxSetup({
+            headers: {
+                "X-CSRFToken": '{{ csrf_token }}'
+            }
+        })
+
+
+       
+        $.ajax({
+            url: "{% url 'customer:cancel_order' %}",
+            method: 'POST',
+            data: {
+                orderId: orderId,
+                reason: cancelReason
+            },
+
+            success: function (response) {
+
+               console.log(response.status);
+
+               $('#cancelModal').modal('hide')
+               location.reload();
+               
+            }
+        })
+    })
+</script>
+
 {% endblock %}

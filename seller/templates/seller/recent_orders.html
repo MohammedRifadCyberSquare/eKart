@@ -3,34 +3,63 @@
 
 {% block content %}
 
-
 <main class="col-md-9">
-   {% if orders %}
-   <h1 class="text-danger text-center">Order History</h1>
+   <h3 class=" text-center ">Recent Orders  </h3>
+
+
+   {% if items %}
    <table class = "table table-hover mt-3">
       <tr>
          <th>Sl No</th>
-         <th>Order No</th>
+         <th>Product</th>
+        <th>Quantity</th>
+         <th>Price</th>
+         <th>Status</th>
 
-         <th>Order Date</th>
-         <th>Total Amount</th>
-
+         
       </tr>
 
-      {% for order_item in orders %}
+      {% for item in items %}
+
+      <form action="" method="POST">
+         {% csrf_token %}
       <tr>
          <td>{{ forloop.counter }}</td>
-         <td> {{ order_item.order.order_no }}</td>
-         <td> {{ order_item.order.created_at }}</td>
-         <td>{{ order_item.order.total_amount }}</td>
-         <td><a href="{% url 'Seller:order_items' order_item.order.order_no %}">View Items</a></td>
+         <td> {{ item.product.product_name | title }}</td>
+         <td>  {{ item.quantity }} No {{ item.quantity | pluralize }}</td>
+         <td>₹ {{ item.price }}</td>
+         <td class="text-danger">{{ item.status | title }}</td>
+         {% if item.status == 'order placed' or item.status == 'packed' or item.status == 'out for delivery' %}
+       
 
+         {% else %}
+         <td >{{ item.cancellation_reason }}</td>
+
+         {% endif %}
+
+         {% if item.status == 'order placed' or item.status == 'packed' or item.status == 'out for delivery' %}
+         <td>
+            <select name="status" id="" class="form-control">
+            
+            <option value="packed">Packed</option>
+            <option value="out for delivery">Out for delivery</option>
+            <option value="delivered">Delivered</option>
+
+
+
+         </select></td>
+
+         {% endif %}
+         {% if item.status == 'order placed' or item.status == 'packed' or item.status == 'out for delivery' %}
+         <td>
+           <input type="submit" name="" id="" class="btn btn-danger" value="Update"></td>
+         {% endif %}
+         <td><input type="hidden" name="order_id" value="{{ item.id }}" id=""></td>
       </tr>
+   </form>
       {% endfor %}
    </table>
 
-   {% else %}
-   <h2 class = "text-danger text-center">No Orders</h2>
    {% endif %}
 </main>
 

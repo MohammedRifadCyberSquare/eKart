@@ -8,6 +8,7 @@
 
         <div class="row">
 
+            {% if request.session.customer %}
             <aside class="col-lg-8">
                 {% if cart_items %}
                 <div class="card">
@@ -119,8 +120,20 @@
 
             </aside>
 
+            {% else %}
+            
+                 <aside class="col-lg-12   d-flex flex-column align-items-center justify-content-center" style="height: 400px;" >
 
+                        <img src="{% static 'images/cart.png' %}" height="150px" alt="">
+                        <span  style="font-size: 30px;" class="my-2">Missing Cart items?</span>
+                        <span class="my-2">Login to see the items you added previously</span>
+                        <span><a href=""  class="btn btn-warning mt-2" style="width: 200px;">Login</a></span>
+                    
+                </aside>
+
+{% endif %}
         </div>
+
 
     </div>
 </section>

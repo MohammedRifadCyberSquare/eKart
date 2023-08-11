@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'eKart_admin',
     'seller',
-    'customer'
+    'customer',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [

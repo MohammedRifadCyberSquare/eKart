@@ -91,8 +91,9 @@
                     <span class="h4 mx-2 ">Personal Information</span>
                 </div>
                 <div>
-                    <a href="">edit</a>
+                    <a href="" id="editName">edit</a>
                 </div>
+
             </div>
 
 
@@ -101,38 +102,43 @@
 
 
                 <div class="mx-2">
-                    <input type="text"  readonly class="form-control  " name="" id="">
+                    <input type="text" value="{{ customer.first_name | title }}" readonly class="form-control  "
+                        name="first_name" id="firstName">
                 </div>
                 <div>
-                    <input type="text" readonly class="form-control " name="" id="">
+                    <input type="text" value="{{ customer.last_name | title }}" readonly class="form-control "
+                        name="last_name" id="lastName">
+
+                </div>
+                <div id="updateName">
+                    <input type="button" class="btn btn-primary mx-2" value="Update" name="" id="btnNameUpdate">
 
                 </div>
             </div>
 
 
-            <div class="d-flex flex-column my-5 ">
-
-                <div class="my-3">
-                    <span class="h6 mx-2 ">your gender</span>
-                </div>
-                <div class="d-flex ">
-                    <input type="radio" name="" id="" class="mx-2"> Male
-                    <input type="radio" name="" id="" class="mx-2"> Female
-                </div>
-            </div>
 
 
-            <div class="d-flex flex-column">
+
+            <div class="d-flex flex-column my-5">
 
 
                 <div>
                     <span>Email address</span>
-                    <span><a href="" class="mx-2">Edit</a></span>
+                    <span><a href="" id="editEmail" class="mx-2">Edit</a></span>
                 </div>
-                <div class="my-2">
-                    <input type="text" readonly class="form-control w-25 " name="" id="">
+                <div class="my-2 d-flex">
+                    <div class="">
+                        <input type="text" readonly class="form-control w-100" value="{{ customer.email }}" name=""
+                            id="email">
 
+                    </div>
+                    <div id="updateEmail">
+                        <input type="button" class="btn btn-primary mx-2" value="Update" name="" id="btnNameUpdate">
+
+                    </div>
                 </div>
+
             </div>
 
             <div class="d-flex flex-column my-4">
@@ -140,41 +146,94 @@
 
                 <div>
                     <span>Mobile No</span>
-                    <span><a href="" class="mx-2">Edit</a></span>
+                    <span><a href="" class="mx-2" id="editMobile">Edit</a></span>
                 </div>
-                <div>
-                    <input type="text" readonly class="form-control w-25 my-2 " name="" id="">
+                <div class="d-flex">
+                    <div>
+                        <input type="text" value="{{ customer.mobile }}" readonly class="form-control w-100 my-0 "
+                            name="" id="mobile">
 
+                    </div>
+
+                    <div id="updateMobile">
+                        <input type="button" class="btn btn-primary mx-2" value="Update" name="" id="btnNameUpdate">
+
+                    </div>
+
+
+
+                </div>
+
+                <div class="my-4">
+                    <div id="updatePassword" class="d-flex flex-column">
+                        <span><span>Password</span><a href="" class="mx-2" id="editPassword">Edit</a></span>
+                        {% if not customer.is_password_changed   %}
+                        <span>Last changed: <span id="passwordStatus">never</span> </span>
+
+
+                        {% else %}
+                         
+                        <span>Last changed: <span>{{ customer.last_changed_on }}</span> </span>
+
+                        {% endif %}
+
+                    </div>
+
+                    <div>
+
+
+                        <div class="d-flex flex-column" id="passwordEditDiv">
+                            <input type="text" class="form-control my-2" placeholder="new password" name=""
+                                id="newPassword" style="width: 280px;">
+                            <input type="text" class="form-control" placeholder="re type password" name=""
+                                id="reTypePassword" style="width: 280px;">
+
+                            <div class="d-flex">
+                                <button type="button" class="btn my-2 mx-2" id="passwdSave"
+                                    style="background-color: rgba(231, 204, 65, 0.9); width: 120px;">Save</button>
+                                <button type="button" class="btn my-2 mx-2 " id="passwdCancel"
+                                    style="background-color: grey;width: 120px">Cancel</button>
+
+
+                            </div>
+                            
+                        </div>
+                        <span id="spanPasswdStatus"></span>
+                    </div>
                 </div>
             </div>
-           
+
             <div>
-              <div class="h4"> FAQs</div> 
-<h6>What happens when I update my email address (or mobile number)?</h6>
-<span>
-    Your login email id (or mobile number) changes, likewise. You'll receive all your account related
-     communication on your updated email address (or mobile number).
-</span>
+                <div class="h4"> FAQs</div>
+                <h6>What happens when I update my email address (or mobile number)?</h6>
+                <span>
+                    Your login email id (or mobile number) changes, likewise. You'll receive all your account related
+                    communication on your updated email address (or mobile number).
+                </span>
 
 
- 
-<h6 class="my-4">When will my eKart account be updated with the new email address (or mobile number)?</h6>
-<span>It happens as soon as you confirm the verification code sent to your email (or mobile) and save the changes.
-</span>
 
-<h6 class="my-4">What happens to my existing eKart account when I update my email address (or mobile number)?</h6>
-<span>
-    Updating your email address (or mobile number) doesn't invalidate your account. Your account remains fully functional. You'll continue seeing your Order history, saved information and personal details.
-    </span>
+                <h6 class="my-4">When will my eKart account be updated with the new email address (or mobile number)?
+                </h6>
+                <span>It happens as soon as you confirm the verification code sent to your email (or mobile) and save
+                    the changes.
+                </span>
 
-    
-<h6 class="my-4">
-    Does my Seller account get affected when I update my email address?
-</h6>
-<span>
-    
-eKart has a 'single sign-on' policy. Any changes will reflect in your Seller account also.
-</span>
+                <h6 class="my-4">What happens to my existing eKart account when I update my email address (or mobile
+                    number)?</h6>
+                <span>
+                    Updating your email address (or mobile number) doesn't invalidate your account. Your account remains
+                    fully functional. You'll continue seeing your Order history, saved information and personal details.
+                </span>
+
+
+                <h6 class="my-4">
+                    Does my Seller account get affected when I update my email address?
+                </h6>
+                <span>
+
+                    eKart has a 'single sign-on' policy. Any changes will reflect in your Seller account also.
+                </span>
             </div>
 
 
@@ -186,5 +245,215 @@ eKart has a 'single sign-on' policy. Any changes will reflect in your Seller acc
     </div>
 </div>
 
+<script>
 
+    var currentFirstName;
+    var currentLastName;
+    var currentEmail;
+    var currentMobile;
+
+    $('#editName').click(function () {
+        event.preventDefault()
+        $('#updateName').show()
+        $('#firstName').removeAttr('readonly')
+        $('#lastName').removeAttr('readonly')
+    })
+
+
+    $('#editEmail').click(function () {
+        event.preventDefault()
+        $('#updateEmail').show()
+        $('#email').removeAttr('readonly')
+
+    })
+
+    $('#editMobile').click(function () {
+        event.preventDefault()
+        $('#updateMobile').show()
+        $('#mobile').removeAttr('readonly')
+
+    })
+    $('#editPassword').click(function () {
+        event.preventDefault()
+
+        $('#passwordEditDiv').css('visibility', 'visible');
+    })
+
+   
+    $('#passwdCancel').click(function () {
+
+
+        $('#passwordEditDiv').css('visibility', 'hidden');
+    })
+
+    $('#passwdSave').click(function () {
+
+        let newPassword = $('#newPassword').val()
+        let reTypePassword = $('#reTypePassword').val()
+
+        if(newPassword.length >= 8){
+            if(newPassword == reTypePassword){
+                $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
+            })   
+
+
+            $.ajax({
+                url: "{% url 'customer:update_customer_profile' %}",
+                method: 'POST',
+                data: {
+                    newPassword: newPassword
+                },
+
+                success: function (response) {
+                    console.log(response.status);
+                     $('#passwordEditDiv').css('visibility', 'hidden');
+                     $('#spanPasswdStatus').html('Password changed')
+                     $('#spanPasswdStatus').css('color','green')
+                     location.reload();
+                }
+
+            })
+
+       
+            }
+            else{
+                $('#spanPasswdStatus').html('Password does not match')
+                $('#spanPasswdStatus').css('color','red')
+            }
+        }
+        else{
+                $('#spanPasswdStatus').html('Password should be min 8 characters')
+                $('#spanPasswdStatus').css('color','red')
+
+        }
+    })
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        currentFirstName = $('#firstName').val().toLowerCase();
+        currentLastName = $('#lastName').val().toLowerCase();
+
+        currentEmail = $('#email').val();
+        currentMobile = $('#mobile').val();
+
+
+    })
+
+    $('#btnNameUpdate').click(function () {
+
+        var updatedFirstName = $('#firstName').val().toLowerCase();
+        var updatedLastName = $('#lastName').val().toLowerCase();
+
+        var params = {}
+        var valueChanged = false
+
+
+        if (currentFirstName != updatedFirstName) {
+            params.firstName = updatedFirstName
+            valueChanged = true
+        }
+
+        if (currentLastName != updatedLastName) {
+            params.lastName = updatedLastName
+            valueChanged = true
+        }
+        console.log(params);
+
+        if (valueChanged == true) {
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
+            })
+
+            $.ajax({
+                url: "{% url 'customer:update_customer_profile' %}",
+                method: 'POST',
+                data: params,
+
+                success: function (response) {
+                    console.log(response.status);
+                }
+
+            })
+        }
+    })
+
+    $('#updateEmail').click(function () {
+        var updatedEmail = $('#email').val()
+        if (currentEmail != updatedEmail) {
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
+            })
+
+            $.ajax({
+                url: "{% url 'customer:update_customer_profile' %}",
+                method: 'POST',
+                data: {
+                    email: updatedEmail
+                },
+
+                success: function (response) {
+                    console.log(response.status);
+                }
+
+            })
+        }
+    })
+
+    $('#updateMobile').click(function () {
+        var updatedMobile = $('#mobile').val()
+        if (currentMobile != updatedMobile) {
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
+            })
+
+            $.ajax({
+                url: "{% url 'customer:update_customer_profile' %}",
+                method: 'POST',
+                data: {
+                    mobile: updatedMobile
+                },
+
+                success: function (response) {
+                    console.log(response.status);
+                }
+
+            })
+        }
+    })
+
+    $('#updateEmail').click(function () {
+        var updatedEmail = $('#email').val()
+        if (currentEmail != updatedEmail) {
+            $.ajaxSetup({
+                headers: {
+                    "X-CSRFToken": '{{ csrf_token }}'
+                }
+            })
+
+            $.ajax({
+                url: "{% url 'customer:update_customer_profile' %}",
+                method: 'POST',
+                data: {
+                    email: updatedEmail
+                },
+
+                success: function (response) {
+                    console.log(response.status);
+                }
+
+            })
+        }
+    })
+
+
+</script>
 {% endblock %}

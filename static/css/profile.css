@@ -14,3 +14,9 @@
    min-height: 500px;
 }
  
+#updateName,#updateEmail,#updateMobile,#passwordEdit{
+    display: None;
+}
+#passwordEditDiv{
+   visibility: hidden;
+}

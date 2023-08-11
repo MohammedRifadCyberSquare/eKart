@@ -9,10 +9,13 @@ class Customer(models.Model):
     first_name = models.CharField(max_length =  20)
     last_name =  models.CharField(max_length =  20)
     email =  models.CharField(max_length =  50)
+    mobile = models.BigIntegerField(default = 0)
     gender = models.CharField(max_length = 10)
     city = models.CharField(max_length = 20)
     country = models.CharField(max_length = 20)
     password = models.CharField(max_length = 20)
+    is_password_changed = models.BooleanField(default = False)
+    last_changed_on = models.DateField(default = date.today)
 
     class Meta:
         db_table = 'customer_tb'
@@ -58,10 +61,8 @@ class Order(models.Model):
     created_at = models.DateField(default = date.today)
     payment_id = models.CharField(max_length = 25, unique = True, null = True)
     signature_id = models.CharField(max_length = 25, unique = True, null = True)
-    order_status = models.CharField(max_length = 20, null = True)
-    ordered_date = models.CharField(max_length = 20, default = '')
     shipping_address = models.ForeignKey(DeliveryAddress, on_delete = models.SET_NULL, null = True)
-
+    
     class Meta:
         db_table = 'order_tb'
 
@@ -72,7 +73,14 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, on_delete = models.CASCADE)
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(max_digits = 10, decimal_places = 2)
+    status = models.CharField(default = 'order placed',max_length = 100 )
+    packed_date = models.DateField(default = date.today, null = True)
+    cancelled_date = models.DateField(default = date.today, null = True)
+    cancellation_reason = models.CharField(max_length = 100)
+    delivery_out = models.DateField(default = date.today, null = True)
+    delivered_date = models.DateField(default = date.today, null = True)
 
+    
     class Meta:
         db_table = 'orderItem_tb'
 
