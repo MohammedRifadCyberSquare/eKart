@@ -1,0 +1,56 @@
+{% extends 'seller/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<article class="box mb-3">
+
+    {% for review in reviews %}
+    <div class="icontext w-100 mt-2" style="width: 200px;">
+
+        <div class="text">
+
+            <div class="d-flex">
+                <h6 class="mb-1 ml-2 ">{{ review.title | title}}</h6>
+                <span class="count ml-2 bg-success badge badge-light text-white mr-2"
+                    style="width: 48px; font-size: 15px;">{{ review.rating }}<span> ★</span></span>
+
+            </div>
+
+
+        </div>
+    </div> <!-- icontext.// -->
+    <div class="my-2">
+        <p>
+            {{ review.review }}
+        </p>
+    </div>
+    <div class="review-img">
+        {% for product_image in review.reviewimage_set.all %}
+        <img src="{{ product_image.image.url }}" style="height: 100px;">
+        {% endfor %}
+
+    </div>
+
+
+    <div style=" margin-top: 8px;font-size: 12px;
+    color: #878787;
+    margin-right: 8px;">
+        <span class="text-muted p-2">{{ review.customer.first_name | title }}</span>
+        <svg width="14" height="14" viewBox="0 0 12 12" xmlns="http://www.w3.org/2000/svg" class="_2a1p_T">
+            <g>
+                <circle cx="6" cy="6" r="6" fill="#878787"></circle>
+                <path stroke="#FFF" stroke-width="1.5" d="M3 6l2 2 4-4" fill="#878787"></path>
+            </g>
+        </svg>
+
+        <span style="font-size: 10px;">Cetified user</span>
+
+    </div>
+    <hr>
+
+    
+    {% endfor %}
+
+</article>
+{% endblock %}

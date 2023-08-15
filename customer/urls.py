@@ -20,6 +20,7 @@ urlpatterns = [
    path('customer/logout',views.logout,name='logout'),
    path('customer/update/profile',views.update_customer_pofile,name='update_customer_profile'),
    path('customer/order-item/cancel',views.cancel_order,name='cancel_order'),
+   path('customer/search/items',views.search_product,name='search_product'),
 
    path('cart/item/remove/<int:cart_id>',views.remove_cart_item,name='remove_cart_item'),
    path('cart/item/update',views.update_cart,name='update_cart'),

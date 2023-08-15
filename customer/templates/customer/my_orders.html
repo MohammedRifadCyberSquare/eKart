@@ -47,18 +47,20 @@
 <div class="container">
     <div class="row">
         <div class="col-md-12 mt-2">
+
+            {% if order_list %}
             <h3 class="text-danger text-center mb-3">My Orders</h3>
 
             {% for order in order_list %}
 
             <div class="d-flex justify-content-between mt-2">
-
+                
                 <div>
                     <img src="{{ order.product.image.url }}" height="100px" width="120px" alt="" srcset="">
                 </div>
 
                 <div style="width: 270px;">
-                    <span>  {{ order.product.product_name }}</span>
+                    <span>  {{ order.product.product_name | title }}</span>
                     <p>order no: <span style="color: blue;"> {{ order.order.order_no }}</span></p>
 
                 </div>
@@ -107,7 +109,14 @@
 
             {% endfor %}
 
+            {% else %}
 
+            <div class="d-flex justify-content-center my-5">
+               <h3 class="text-danger">No Data Found</h3>
+         
+            </div>
+
+            {% endif %}
         </div>
     </div>
 </div>

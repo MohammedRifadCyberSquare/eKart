@@ -17,6 +17,14 @@
             <div class="card-body">
                <h5>{{ item.product_name | title }}</h5>
                <h5>Available stock : {{ item.stock }}</h5>
+               
+               <h4>
+               <span class="count ml-2 bg-success text-center badge badge-light text-white mr-2"
+               style="width: 48px; font-size: 15px;">{{ item.rating }}<span> ★</span></span>
+            </h4>
+            <a href="{% url 'Seller:product_reviews' item.id %}" class="modal-open">Reviews</a>
+            <br>
+            <a href="{% url 'Seller:product_questions' item.id %}">Questions</a>
             </div>
           </div>
 
@@ -25,5 +33,6 @@
    </div>
 </main>
 
-
+ 
+ 
 {% endblock %}

@@ -3,8 +3,8 @@ from eKart_admin.models import Category
 from django.core.exceptions import ObjectDoesNotExist
 from .models import Seller
 from datetime import date
-
-from customer.models import OrderItem
+from django.db.models import Count
+from customer.models import OrderItem, ProductReview,ProductQuestion
 from django.db.models import Q
 from django.http import JsonResponse
 from seller.models import Product
@@ -72,10 +72,22 @@ def view_category(request):
 
 def view_products(request):
     products = Product.objects.filter(seller = request.session['seller'])
+    reviews =  ProductReview.objects.filter(product__seller = request.session['seller'])
+    product_rating =reviews.values('rating').annotate(count = Count('rating'))
     return render(request, 'seller/product_catalogue.html', {'products': products,})
 
 def profile(request):
     return render(request,'seller/profile.html')
+
+def product_reviews(request, product_id):
+    reviews =  ProductReview.objects.filter(product = product_id)
+    print(reviews)
+    return render(request,'seller/product_reviews.html',{'reviews': reviews,})
+
+def product_questions(request, product_id):
+    questions =  ProductQuestion.objects.filter(product__seller = request.session['seller'])
+    print(questions)
+    return render(request,'seller/questions.html',{'questions': questions,})
 
 def change_password(request):
     status_msg = ''
@@ -141,7 +153,8 @@ def update_order_status(request, order_id):
 
 def recent_orders(request):
     
-    orders = OrderItem.objects.filter(~Q(status = 'delivered'),product__seller = request.session['seller'] )
+    orders = OrderItem.objects.filter((Q(status = ' d') | Q(status = 'out for  ') |  Q(status = 'order pdlaced')),product__seller = request.session['seller'] )
+    print(orders)
     if request.method == 'POST':
         try:
             print('uuu')
@@ -166,8 +179,7 @@ def recent_orders(request):
             None
     return render(request,'seller/recent_orders.html', {'items': orders})
 
-def order_history(request):
-    return render(request,'seller/order_history.html')
+
 
 def order_items(request, order_no):
     items = OrderItem.objects.filter(order__order_no = order_no, product__seller = request.session['seller'] )
@@ -197,3 +209,7 @@ def order_items(request, order_no):
             print(e)
             None
     return render(request,'seller/order_items.html', {'items': items, 'order_no': order_no})
+
+def order_history(request):
+    orders = OrderItem.objects.filter((Q(status = 'cancelled') | Q(status = 'delivered')),product__seller = request.session['seller'])
+    return render(request,'seller/order_history.html', {'orders': orders})

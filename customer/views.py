@@ -5,6 +5,7 @@ from django.core.mail import send_mail, EmailMultiAlternatives
 from django.shortcuts import get_object_or_404  
 from .models import *
 from .rating import *
+from django.db.models import Q
 from datetime import date
 from django.db.models import Count,ExpressionWrapper,FloatField
 from seller.models import Product, Seller
@@ -22,7 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 
 def customer_home(request):
-     
+    print('*************')
     return render(request, 'customer/customer_home.html',  )
 
 
@@ -35,13 +36,16 @@ def store(request):
     else:
          
         products = Product.objects.filter(category = query)
-    count = products.count()
-
+    
+    
+    if  'search_text' in request.GET:
+        search_text = request.GET.get('search_text')
+        products = Product.objects.filter(Q(category__category__icontains = search_text) | Q(product_name__icontains = search_text))
+    count = products.count()    
     context = {
         'products': products,
         'product_count': count
     }
-
     return render(request, 'customer/store.html', context)
 
 
@@ -344,7 +348,7 @@ def product_review(request,id):
     return render(request, 'customer/product_review.html', {'purchased': purchased})
 
 def myorders(request):
-    orders = OrderItem.objects.filter(customer = request.session['customer'])
+    orders = OrderItem.objects.filter(customer = request.session['customer']).order_by('id')
     print(orders)
     return render(request, 'customer/my_orders.html', {'orders': orders})
 
@@ -441,10 +445,7 @@ def customer_signup(request):
             message = 'Registration Succesful'
             status = True
 
-        
-        else:
-            message = 'Email Exists'
-   
+
 
     return render(request, 'customer/customer_signup.html', {'message': message, 'status': status})
 
@@ -484,7 +485,7 @@ def forgot_password_seller(request):
 
 def my_orders(request):
     
-    orders = OrderItem.objects.filter(customer = request.session['customer'])
+    orders = OrderItem.objects.filter(customer = request.session['customer']).order_by('-id')
      
     return render(request, 'customer/my_orders.html', {'order_list': orders})
 
@@ -567,3 +568,12 @@ def update_customer_pofile(request):
 
     customer.save()
     return JsonResponse({'status': 200, })
+
+
+def search_product(request):
+    search_query = request.POST['search_text'].lower()
+
+    search_result = Product.objects.filter(Q(category__category__icontains = search_query) | Q(product_name__icontains = search_query))
+    
+    print(search_result)
+    return render(request, 'customer/store.html',{'products':search_result,'product_count': search_result.count()})

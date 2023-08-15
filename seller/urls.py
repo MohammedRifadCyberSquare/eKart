@@ -11,6 +11,8 @@ urlpatterns = [
     # path('view_category',views.view_category,name="view_category"),
     path('profile',views.profile,name="profile"),
     path('password/change',views.change_password,name="change_password"),
+    path('product/reviews/<int:product_id>',views.product_reviews,name="product_reviews"),
+    path('product/questions/<int:product_id>',views.product_questions,name="product_questions"),
 
     path('myOrders',views.view_orders,name="view_orders"),
     path('stock/update',views.update_stock,name="update_stock"),

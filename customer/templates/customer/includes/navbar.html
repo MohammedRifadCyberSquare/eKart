@@ -2,87 +2,95 @@
 
 <header class="section-header">
     <nav class="navbar p-md-0 navbar-expand-sm navbar-light border-bottom">
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop4" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarTop4">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item dropdown">
-                 <a href="#" class="nav-link">   English </a>
-                
-            </li>
-            <li class="nav-item dropdown">
-                <a href="#" class="nav-link"> USD </a>
-            </li>
-        </ul>
-        <ul class="navbar-nav">
-            <li><a href="{% url 'customer:seller_register' %}" class="nav-link">Become a seller </a></li>
-        </ul> <!-- list-inline //  -->
-      </div> <!-- navbar-collapse .// -->
-    </div> <!-- container //  -->
+        <div class="container">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTop4"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarTop4">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"> English </a>
+
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link"> USD </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li><a href="{% url 'customer:seller_register' %}" class="nav-link">Become a seller </a></li>
+                </ul> <!-- list-inline //  -->
+            </div> <!-- navbar-collapse .// -->
+        </div> <!-- container //  -->
     </nav>
-    
+
     <section class="header-main border-bottom">
         <div class="container">
-    <div class="row align-items-center">
-        <div class="col-lg-2 col-md-3 col-6">
-            <a href="{% url 'customer:customer_home' %}" class="brand-wrap">
-                <img class=" " src="{% static './images/logo.png' %}" height = "80px" width = "100px">
-            </a> <!-- brand-wrap.// -->
-        </div>
-        <div class="col-lg col-sm col-md col-6 flex-grow-0">
-            <div class="category-wrap dropdown d-inline-block float-right">
-                <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown"> 
-                    <i class="fa fa-bars"></i> All category 
-                </button>
-                <div class="dropdown-menu">
-                    {% for item in category_list %}
-                    <a class="dropdown-item" href="{% url 'customer:store' %}?query={{ item.id }}">{{ item.category }} </a>
-                    {% endfor %}
+            <div class="row align-items-center">
+                <div class="col-lg-2 col-md-3 col-6">
+                    <a href="{% url 'customer:customer_home' %}" class="brand-wrap">
+                        <img class=" " src="{% static './images/logo.png' %}" height="80px" width="100px">
+                    </a> <!-- brand-wrap.// -->
                 </div>
-            </div>  <!-- category-wrap.// -->
-        </div> <!-- col.// -->
-        <a href="{% url 'customer:store' %}?query=all" class="btn btn-outline-primary">Store</a>
-        <div class="col-lg  col-md-6 col-sm-12 col">
-            <form action="#" class="search">
-                <div class="input-group w-100">
-                    <input type="text" class="form-control" style="width:50%;" placeholder="Search">
-                    
-                    <div class="input-group-append">
-                      <button class="btn btn-primary" type="submit">
-                        <i class="fa fa-search"></i>
-                      </button>
+                <div class="col-lg col-sm col-md col-6 flex-grow-0">
+                    <div class="category-wrap dropdown d-inline-block float-right">
+                        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+                            <i class="fa fa-bars"></i> All category
+                        </button>
+                        <div class="dropdown-menu">
+                            {% for item in category_list %}
+                            <a class="dropdown-item" href="{% url 'customer:store' %}?query={{ item.id }}">{{item.category }} </a>
+                            {% endfor %}
+                        </div>
+                    </div> <!-- category-wrap.// -->
+                </div> <!-- col.// -->
+                <a href="{% url 'customer:store' %}?query=all" class="btn btn-outline-primary">Store</a>
+                <div class="col-lg  col-md-6 col-sm-12 col">
+                    <form  class="search" method="GET" action="{% url 'customer:store' %}">
+                        <div class="input-group w-100">
+                         
+                                
+                                <input type="text" name="search_text" class="form-control" style="width:50%;" placeholder="search by product name or category">
+                          
+                            <div class="input-group-append">
+                                <button class="btn btn-primary"   >
+                                    <i class="fa fa-search"></i>
+                                </button>
 
-                      <button class="nav-link btn btn-primary ml-2 dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Account
-                      </button>
-                      <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <li><a class="dropdown-item" href="{% url 'customer:profile' %}">My Profile</a></li>
-                        <li><a class="dropdown-item" href="{% url 'customer:my_orders' %}">Orders</a></li>
-                        <li><a class="dropdown-item" href="{% url 'customer:logout' %}">Logout</a></li>
-                      </ul>
-                    </div>
-                </div>
-            </form> 
-            
-           
-        </div> <!-- col.// -->
-        <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
+                                <button class="nav-link btn btn-primary ml-2 dropdown-toggle" href="#"
+                                    id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    Account
+                                </button>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                    <li><a class="dropdown-item" href="{% url 'customer:profile' %}">My Profile</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'customer:my_orders' %}">Orders</a></li>
+                                    <li><a class="dropdown-item" href="{% url 'customer:logout' %}">Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        </form>
+                    
+
+
+                </div> <!-- col.// -->
+                <div class="col-lg-3 col-sm-6 col-8 order-2 order-lg-3">
                     <div class="d-flex justify-content-end mb-3 mb-lg-0">
                         <div class="widget-header">
-                            
-                            
+
+
                             {% if not request.session.customer %}
-                            <div> 
+                            <div>
                                 <small class="title text-muted">Welcome guest!</small>
-                                <a href="{% url 'customer:customer_login' %}">Sign in</a> <span class="dark-transp"> | </span>
+                                <a href="{% url 'customer:customer_login' %}">Sign in</a> <span class="dark-transp"> |
+                                </span>
                                 <a href="{% url 'customer:customer_signup' %}"> Register</a>
                             </div>
 
                             {% else %}
                             <small class="title text-muted">Welcome {{ request.session.customer_name }}!</small>
-                           
+
                             {% endif %}
                         </div>
                         <a href="{% url 'customer:cart' 'list' %}" class="widget-header pl-3 ml-3">
@@ -91,13 +99,11 @@
                         </a>
                     </div> <!-- widgets-wrap.// -->
                 </div> <!-- col.// -->
-    </div> <!-- row.// -->
+            </div> <!-- row.// -->
         </div> <!-- container.// -->
     </section> <!-- header-main .// -->
-    
-    
-    
-    
-    </header> <!-- section-header.// -->
-    
-    
+
+
+
+
+</header> <!-- section-header.// -->
